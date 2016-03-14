@@ -11,7 +11,7 @@ import org.archive.crawler.framework.exceptions.InitializationException;
 import org.archive.crawler.settings.XMLSettingsHandler;
 
 public class StartHeritrix {
-    private final static String orderFilePath = "/conf/profiles/default/order.xml";
+    private final static String orderFilePath = "/jobs/CMDjob/order.xml";
     public  static  void main(String[] args)
     {
         File file = null;   //order.xml文件
@@ -24,7 +24,7 @@ public class StartHeritrix {
             //如果order.xml文件不存在
             if(!file.exists())
             {
-                System.out.println("order.xml文件不存在!!");
+                System.err.println("order.xml文件不存在!!");
                 return ;
             }
 
