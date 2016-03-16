@@ -140,10 +140,12 @@ Reporter, ProgressStatisticsReporter {
             
             while ( true ) {
                 // TODO check for thread-abort? or is waiting for interrupt enough?
+                // 检查是否应该继续处理
                 continueCheck();
                 
                 setStep(STEP_ABOUT_TO_GET_URI);
-                
+
+                //从Frontier取出下一个要处理的URL
                 CrawlURI curi = controller.getFrontier().next();
                 
                 synchronized(this) {
@@ -155,7 +157,10 @@ Reporter, ProgressStatisticsReporter {
                 
                 setStep(STEP_ABOUT_TO_RETURN_URI);
                 continueCheck();
-
+                // 使用Frontier的finished()方法
+                // 来对刚才处理的链接做收尾工作
+                // 比如将分析得到的新的链接加入
+                // 到等待队列中去
                 synchronized(this) {
                     controller.getFrontier().finished(currentCuri);
                     setCurrentCuri(null);

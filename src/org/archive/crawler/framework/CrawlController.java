@@ -151,8 +151,8 @@ public class CrawlController implements Serializable, Reporter {
 
 
     // Used to enable/disable single-threaded operation after OOM
-    private volatile transient boolean singleThreadMode = false; 
-    private transient ReentrantLock singleThreadLock = null;
+    private volatile transient boolean singleThreadMode = false; //是否是单线程模式
+    private transient ReentrantLock singleThreadLock = null; // 锁,控制同时只能一个线程运行使用本类
 
     // emergency reserve of memory to allow some progress/reporting after OOM
     private transient LinkedList<char[]> reserveMemory;
@@ -179,7 +179,7 @@ public class CrawlController implements Serializable, Reporter {
     transient private Object state = NASCENT;
 
     // disk paths
-    private transient File disk;        // overall disk path
+    private transient File disk;        // overall disk path 整个Heritrix目录
     private transient File logsDisk;    // for log files
     
     /**
@@ -211,9 +211,9 @@ public class CrawlController implements Serializable, Reporter {
     private transient Checkpoint checkpointRecover = null;
 
     // crawl limits
-    private long maxBytes;
-    private long maxDocument;
-    private long maxTime;
+    private long maxBytes; //最大字节数，来源于配置文件
+    private long maxDocument;//抓取限制， 最大文档数，来源于配置文件
+    private long maxTime;// 抓取限制，最大时间，来源于配置文件
 
     /**
      * A manifest of all files used/created during this crawl. Written to file
@@ -271,7 +271,7 @@ public class CrawlController implements Serializable, Reporter {
      */
     public transient Logger reports;
 
-    protected StatisticsTracking statistics = null;
+    protected StatisticsTracking statistics = null; // 统计跟踪器
 
     /**
      * List of crawl status listeners.
@@ -325,7 +325,9 @@ public class CrawlController implements Serializable, Reporter {
         this.singleThreadLock = new ReentrantLock();
         this.settingsHandler = sH;
         installThreadContextSettingsHandler();
+        //CrawlOrder类,Heritrix的核心类,基本上对应着order.xml的各个属性值,除了各个组件的详细属性
         this.order = settingsHandler.getOrder();
+
         this.order.setController(this);
         this.bigmaps = new Hashtable<String,ObjectIdentityCache<?,?>>();
         sExit = "";
@@ -336,14 +338,17 @@ public class CrawlController implements Serializable, Reporter {
             " header values to acceptable strings. \n" +
             " User-Agent: [software-name](+[info-url])[misc]\n" +
             " From: [email-address]\n";
+            //检查order.xml的UserAgent和From格式是否正确
             order.checkUserAgentAndFrom();
 
             onFailMessage = "Unable to setup disk";
             if (disk == null) {
+                //设置各个存放目录
                 setupDisk();
             }
 
             onFailMessage = "Unable to create log file(s)";
+            //设置日志目录
             setupLogs();
             
             // Figure if we're to do a checkpoint restore. If so, get the

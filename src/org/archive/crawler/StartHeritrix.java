@@ -3,7 +3,6 @@
  */
 package org.archive.crawler;
 import java.io.File;
-import java.io.IOException;
 import javax.management.InvalidAttributeValueException;
 import org.archive.crawler.event.CrawlStatusListener;
 import org.archive.crawler.framework.CrawlController;
@@ -20,6 +19,7 @@ public class StartHeritrix {
         CrawlController controller = null;  //Heritrix的控制器
 
         try{
+            //定位到jobs的文件夹
             file=new File(System.getProperty("user.dir") + orderFilePath);
             //如果order.xml文件不存在
             if(!file.exists())
@@ -37,16 +37,16 @@ public class StartHeritrix {
             if (listener != null) {
                 controller.addCrawlStatusListener(listener);//控制器添加监听器
             }
+
             controller.requestCrawlStart();//开始抓取
 
-           // 如果Heritrix还一直在运行则等待
+            // 如果Heritrix还一直在运行则等待
             while (true) {
                 if (controller.isRunning() == false) {
                     break;
                 }
                 Thread.sleep(1000);
             }
-
             //如果Heritrix不再运行则停止
             controller.requestCrawlStop();
         } catch (InvalidAttributeValueException e){

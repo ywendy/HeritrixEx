@@ -109,16 +109,20 @@ public class ToePool extends ThreadGroup implements Reporter {
     public void setSize(int newsize)
     {
         targetSize = newsize;
-        int difference = newsize - getToeCount(); 
+        int difference = newsize - getToeCount();
+        // 如果发现线程池中的实际线程数量小于应有的数量
+        // 则启动新的线程
         if (difference > 0) {
             // must create threads
             for(int i = 1; i <= difference; i++) {
                 startNewThread();
             }
         } else {
+            // 如果线程池中的线程数量已经达到需要
             // must retire extra threads
             int retainedToes = targetSize; 
             Thread[] toes = this.getToes();
+            // 循环去除多余的线程
             for (int i = 0; i < toes.length ; i++) {
                 if(!(toes[i] instanceof ToeThread)) {
                     continue;
