@@ -23,6 +23,8 @@
  */
 package org.archive.crawler.prefetch;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.logging.Level;
@@ -43,7 +45,7 @@ import org.archive.crawler.framework.Processor;
 import org.archive.crawler.settings.SimpleType;
 import org.archive.crawler.settings.Type;
 import org.archive.net.UURI;
-
+import org.archive.crawler.util.Mytools;
 /**
  * Ensures the preconditions for a fetch -- such as DNS lookup 
  * or acquiring and respecting a robots.txt policy -- are
@@ -108,10 +110,12 @@ public class PreconditionEnforcer
 
     protected void innerProcess(CrawlURI curi) {
 
+        //说明该URL已经通过了DNS解析
         if (considerDnsPreconditions(curi)) {
             return;
         }
 
+        //当该URL不是以https和http开头,则退出当前处理器,进入下一环
         // make sure we only process schemes we understand (i.e. not dns)
         String scheme = curi.getUURI().getScheme().toLowerCase();
         if (! (scheme.equals("http") || scheme.equals("https"))) {
@@ -218,13 +222,16 @@ public class PreconditionEnforcer
      * @return true if no further processing in this module should occur
      */
     private boolean considerDnsPreconditions(CrawlURI curi) {
+
+        //如果它是以DNS协议开头,则满足先决条件
         if(curi.getUURI().getScheme().equals("dns")){
             // DNS URIs never have a DNS precondition
             curi.setPrerequisite(true);
             return false; 
         }
-        
+//
         CrawlServer cs = getController().getServerCache().getServerFor(curi);
+        //如果该URL没有服务器缓存,则直接跳到最后的处理链
         if(cs == null) {
             curi.setFetchStatus(S_UNFETCHABLE_URI);
             curi.skipToProcessorChain(getController().getPostprocessorChain());
@@ -234,6 +241,7 @@ public class PreconditionEnforcer
         // If we've done a dns lookup and it didn't resolve a host
         // cancel further fetch-processing of this URI, because
         // the domain is unresolvable
+        //域名不可以解析
         CrawlHost ch = getController().getServerCache().getHostFor(curi);
         if (ch == null || ch.hasBeenLookedUp() && ch.getIP() == null) {
             if (logger.isLoggable(Level.FINE)) {
@@ -247,11 +255,14 @@ public class PreconditionEnforcer
 
         // If we haven't done a dns lookup  and this isn't a dns uri
         // shoot that off and defer further processing
+        //如果该IP已过期或者尚未被查找
         if (isIpExpired(curi) && !curi.getUURI().getScheme().equals("dns")) {
             logger.fine("Deferring processing of CrawlURI " + curi.toString()
                 + " for dns lookup.");
             String preq = "dns:" + ch.getHostName();
             try {
+                //设置该URL的先决条件为"dns:" + host,跳至最后一步,暂不处理
+
                 curi.markPrerequisite(preq,
                     getController().getPostprocessorChain());
             } catch (URIException e) {
@@ -291,6 +302,7 @@ public class PreconditionEnforcer
         CrawlHost host = getController().getServerCache().getHostFor(curi);
         if (!host.hasBeenLookedUp()) {
             // IP has not been looked up yet.
+            //该IP尚未经过DNS解析
             return true;
         }
 
@@ -323,7 +335,7 @@ public class PreconditionEnforcer
         if (duration > 0) {
             duration *= 1000;
         }
-
+        //判断IP是否过期
         return (duration + host.getIpFetched()) < System.currentTimeMillis();
     }
 
@@ -497,4 +509,5 @@ public class PreconditionEnforcer
         }
         return result;
     }
+
 }

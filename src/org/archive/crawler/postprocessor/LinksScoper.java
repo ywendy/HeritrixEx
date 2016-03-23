@@ -43,6 +43,7 @@ import org.archive.crawler.extractor.Link;
 import org.archive.crawler.framework.Scoper;
 import org.archive.crawler.settings.SimpleType;
 import org.archive.crawler.settings.Type;
+import org.archive.crawler.util.Mytools;
 
 /**
  * Determine which extracted links are within scope.
@@ -120,7 +121,7 @@ implements FetchStatusCodes {
         if (LOGGER.isLoggable(Level.FINEST)) {
             LOGGER.finest(getName() + " processing " + curi);
         }
-        
+
         // If prerequisites, nothing to be done in here.
         if (curi.hasPrerequisiteUri()) {
             handlePrerequisite(curi);

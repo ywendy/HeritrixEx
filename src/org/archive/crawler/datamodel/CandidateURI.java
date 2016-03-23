@@ -54,6 +54,8 @@ import st.ata.util.HashtableAList;
  * See accessors/setters {@link #putString(String, String)},
  * {@link #getString(String)}, etc. 
  *
+ * Heritrix的核心类,代表着一个URL,贯穿整个抓取,与CrawlURI的区别是它还没有通过调度器(Frontier)，
+ * 只有通过了调度器的URL才可能去获取网页内容区下载等
  * @author Gordon Mohr
  */
 public class CandidateURI

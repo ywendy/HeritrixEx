@@ -31,9 +31,10 @@ import org.archive.crawler.settings.SettingsHandler;
 import org.archive.util.ObjectIdentityCache;
 import org.archive.util.ObjectIdentityMemCache;
 import org.archive.util.Supplier;
-
 /**
  * Server and Host cache.
+ *  ServerCache:服务器缓存,主要缓存CrawlHost和CrawlServer,其中CrawlHost中保存着域名、IP等,
+ 而CrawlServer中里面装载着一个Host的各种Heritrix数据,如统计信息、爬虫协议
  * @author stack
  * @version $Date: 2009-11-09 23:40:30 +0000 (Mon, 09 Nov 2009) $, $Revision: 6635 $
  */

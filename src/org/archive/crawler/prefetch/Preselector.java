@@ -107,6 +107,7 @@ implements FetchStatusCodes {
         try {
             String regexp = (String) getAttribute(ATTR_ALLOW_BY_REGEXP, curi);
             if (regexp != null && !regexp.equals("")) {
+                //当regexp不匹配的时候,直接跳到最后一个post处理器
                 if (!TextUtils.matches(regexp, curi.toString())) {
                     curi.setFetchStatus(S_BLOCKED_BY_USER);
                     curi.skipToProcessorChain(getController().

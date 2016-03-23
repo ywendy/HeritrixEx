@@ -49,6 +49,7 @@ import org.archive.crawler.settings.RegularExpressionConstraint;
 import org.archive.crawler.settings.SimpleType;
 import org.archive.crawler.settings.StringList;
 import org.archive.crawler.settings.Type;
+import org.archive.crawler.util.Mytools;
 import org.archive.io.RecordingInputStream;
 import org.archive.io.ReplayInputStream;
 import org.archive.net.UURI;
@@ -302,6 +303,7 @@ extends Processor implements CoreAttributeConstants {
         if (!curi.isSuccess()) {
             return;
         }
+
         UURI uuri = curi.getUURI(); // Current URI.
 
         // Only http and https schemes are supported.

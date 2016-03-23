@@ -23,7 +23,11 @@
  */
 package org.archive.crawler.framework;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
@@ -306,6 +310,7 @@ Reporter, ProgressStatisticsReporter {
                     setStep(STEP_ABOUT_TO_BEGIN_PROCESSOR);
                     Processor currentProcessor = getProcessor(currentCuri.nextProcessor());
                     currentProcessorName = currentProcessor.getName();
+             //       writeFile("debug.txt",currentProcessorName);
                     continueCheck();
 //                    long memBefore = (Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory())/1024;
                     currentProcessor.process(currentCuri);
@@ -313,6 +318,7 @@ Reporter, ProgressStatisticsReporter {
 //                    System.out.println((memAfter-memBefore)+"K in "+currentProcessorName);
                 }
             }
+
             setStep(STEP_DONE_WITH_PROCESSORS);
             currentProcessorName = "";
         } catch (RuntimeExceptionWrapper e) {
@@ -623,4 +629,5 @@ Reporter, ProgressStatisticsReporter {
     public String getCurrentProcessorName() {
         return currentProcessorName;
     }
+
 }

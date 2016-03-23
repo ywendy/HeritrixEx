@@ -25,7 +25,7 @@ public class StartHeritrix {
             if(!file.exists())
             {
                 System.err.println("order.xml文件不存在!!");
-                return ;
+                System.exit(-1); //非正常退出
             }
 
             handler = new XMLSettingsHandler(file);

@@ -601,6 +601,7 @@ implements CrawlStatusListener, Frontier, FetchStatusCodes,
         int count = 0; 
         while (iter.hasNext()) {
             UURI u = (UURI)iter.next();
+
             CandidateURI caUri = CandidateURI.createSeedCandidateURI(u);
             caUri.setSchedulingDirective(CandidateURI.MEDIUM);
             if (((Boolean)getUncheckedAttribute(null, ATTR_SOURCE_TAG_SEEDS))

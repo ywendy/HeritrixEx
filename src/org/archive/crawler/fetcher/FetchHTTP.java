@@ -100,6 +100,7 @@ import org.archive.crawler.settings.SettingsHandler;
 import org.archive.crawler.settings.SimpleType;
 import org.archive.crawler.settings.StringList;
 import org.archive.crawler.settings.Type;
+import org.archive.crawler.util.Mytools;
 import org.archive.httpclient.ConfigurableX509TrustManager;
 import org.archive.httpclient.HttpRecorderGetMethod;
 import org.archive.httpclient.HttpRecorderMethod;
@@ -436,6 +437,7 @@ implements CoreAttributeConstants, FetchStatusCodes, CrawlStatusListener {
         boolean digestContent  = ((Boolean)getUncheckedAttribute(curi,
                 ATTR_DIGEST_CONTENT)).booleanValue();
         String algorithm = null;
+        //内容文摘digest,实际上是通过MD5或SHA1算法将网页内容指纹化
         if (digestContent) {
             algorithm = ((String)getUncheckedAttribute(curi,
                 ATTR_DIGEST_ALGORITHM));
@@ -444,10 +446,11 @@ implements CoreAttributeConstants, FetchStatusCodes, CrawlStatusListener {
             // clear
             rec.getRecordedInput().setDigest((MessageDigest)null);
         }        
-        
+
         // Below we do two inner classes that add check of midfetch
         // filters just as we're about to receive the response body.
         String curiString = curi.getUURI().toString();
+
         HttpMethodBase method = null;
         if (curi.isPost()) {
             method = new HttpRecorderPostMethod(curiString, rec) {
