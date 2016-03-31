@@ -23,13 +23,6 @@
  */
 package org.archive.crawler.extractor;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.regex.Matcher;
-
 import org.apache.commons.httpclient.URIException;
 import org.archive.crawler.datamodel.CoreAttributeConstants;
 import org.archive.crawler.datamodel.CrawlURI;
@@ -43,6 +36,13 @@ import org.archive.util.DevUtils;
 import org.archive.util.HttpRecorder;
 import org.archive.util.TextUtils;
 import org.archive.util.UriUtils;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Matcher;
 
 /**
  * Basic link-extraction, from an HTML content-body,
@@ -251,7 +251,7 @@ implements CoreAttributeConstants {
         CharSequence valueVal = null; 
         CharSequence valueContext = null;
         CharSequence nameVal = null; 
-        
+        String a;
         final boolean framesAsEmbeds = ((Boolean)getUncheckedAttribute(curi,
             ATTR_TREAT_FRAMES_AS_EMBED_LINKS)).booleanValue();
 
@@ -274,10 +274,18 @@ implements CoreAttributeConstants {
             value = TextUtils.unescapeHtml(value);
             if (attr.start(2) > -1) {
                 // HREF
+//                try {
+//                    URL href = new URL(value.toString());
+//                } catch (MalformedURLException e) {
+////                    e.printStackTrace();
+//                }
+
+//                Mytools.writeFile("debug.txt","*"+curi.toString()+"#"+value+"*");
                 CharSequence context =
                     Link.elementContext(element, attr.group(2));
                 if(elementStr.equalsIgnoreCase(LINK)) {
                     // <LINK> elements treated as embeds (css, ico, etc)
+
                     processEmbed(curi, value, context);
                 } else {
                     // other HREFs treated as links
@@ -474,7 +482,7 @@ implements CoreAttributeConstants {
      * outlink. 
      * 
      * @param curi origin CrawlURI
-     * @param queryString query-string-like string
+     * @param candidate query-string-like string
      * @param valueContext page context where found
 
      */
@@ -840,5 +848,6 @@ implements CoreAttributeConstants {
             "\n\n");
         return ret.toString();
     }
+
 }
 

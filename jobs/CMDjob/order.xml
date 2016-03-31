@@ -174,7 +174,7 @@
       </newObject>
     </map>
     <map name="write-processors">
-      <newObject name="Archiver" class="org.archive.crawler.writer.ARCWriterProcessor">
+      <!--newObject name="Archiver" class="org.archive.crawler.writer.ARCWriterProcessor">
         <boolean name="enabled">true</boolean>
         <map name="filters">
         </map>
@@ -188,6 +188,9 @@
         <integer name="pool-max-active">5</integer>
         <integer name="pool-max-wait">300000</integer>
         <long name="total-bytes-to-write">0</long>
+      </newObject-->
+      <newObject name="Mirror" class="org.archive.crawler.writer.MirrorWriterProcessor">
+         <boolean name="enabled">true</boolean><!-- 是否启用该组件 -->
       </newObject>
     </map>
     <map name="post-processors">

@@ -29,7 +29,6 @@ import org.archive.crawler.settings.SimpleType;
 import org.archive.crawler.settings.Type;
 
 
-
 /**
  * Rule REJECTs any CrawlURIs whose total number of hops (length of the 
  * hopsPath string, traversed links of any type) is over a threshold.
@@ -54,6 +53,7 @@ public class TooManyHopsDecideRule extends PredicatedDecideRule {
      */
     public TooManyHopsDecideRule(String name) {
         super(name);
+
         setDescription("TooManyHopsDecideRule. REJECTs URIs discovered " +
                 "after too many hops (followed links of any type) from seed.");
         addElementToDefinition(new SimpleType(ATTR_MAX_HOPS, "Max path" +
@@ -73,6 +73,7 @@ public class TooManyHopsDecideRule extends PredicatedDecideRule {
      */
     protected boolean evaluate(Object object) {
         try {
+//            Mytools.writeFile("debug.txt","#evaluate max_hops#");
             CandidateURI curi = (CandidateURI)object;
             return curi.getPathFromSeed() != null &&
                 curi.getPathFromSeed().length() > getThresholdHops(object);

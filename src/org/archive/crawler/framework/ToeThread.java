@@ -23,31 +23,15 @@
  */
 package org.archive.crawler.framework;
 
-import java.io.FileWriter;
-import java.io.IOException;
+import com.sleepycat.util.RuntimeExceptionWrapper;
+import org.archive.crawler.datamodel.*;
+import org.archive.crawler.framework.exceptions.EndedException;
+import org.archive.util.*;
+
 import java.io.PrintWriter;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import org.archive.crawler.datamodel.CoreAttributeConstants;
-import org.archive.crawler.datamodel.CrawlOrder;
-import org.archive.crawler.datamodel.CrawlURI;
-import org.archive.crawler.datamodel.FetchStatusCodes;
-import org.archive.crawler.datamodel.InstancePerThread;
-import org.archive.crawler.framework.exceptions.EndedException;
-import org.archive.util.ArchiveUtils;
-import org.archive.util.DevUtils;
-import org.archive.util.HttpRecorder;
-import org.archive.util.HttpRecorderMarker;
-import org.archive.util.ProgressStatisticsReporter;
-import org.archive.util.Reporter;
-
-import com.sleepycat.util.RuntimeExceptionWrapper;
-
 /**
  * One "worker thread"; asks for CrawlURIs, processes them,
  * repeats unless told otherwise.
@@ -156,9 +140,8 @@ Reporter, ProgressStatisticsReporter {
                     continueCheck();
                     setCurrentCuri(curi);
                 }
-                
+//                Mytools.writeFile("debug.txt",curi.toString());
                 processCrawlUri();
-                
                 setStep(STEP_ABOUT_TO_RETURN_URI);
                 continueCheck();
                 // 使用Frontier的finished()方法
@@ -310,7 +293,7 @@ Reporter, ProgressStatisticsReporter {
                     setStep(STEP_ABOUT_TO_BEGIN_PROCESSOR);
                     Processor currentProcessor = getProcessor(currentCuri.nextProcessor());
                     currentProcessorName = currentProcessor.getName();
-             //       writeFile("debug.txt",currentProcessorName);
+//                    Mytools.writeFile("debug.txt",currentProcessorName);
                     continueCheck();
 //                    long memBefore = (Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory())/1024;
                     currentProcessor.process(currentCuri);

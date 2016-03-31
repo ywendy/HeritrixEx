@@ -23,29 +23,20 @@
  */
 package org.archive.crawler.prefetch;
 
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.management.AttributeNotFoundException;
-
 import org.apache.commons.httpclient.URIException;
-import org.archive.crawler.datamodel.CoreAttributeConstants;
-import org.archive.crawler.datamodel.CrawlHost;
-import org.archive.crawler.datamodel.CrawlServer;
-import org.archive.crawler.datamodel.CrawlURI;
-import org.archive.crawler.datamodel.CredentialStore;
-import org.archive.crawler.datamodel.FetchStatusCodes;
+import org.archive.crawler.datamodel.*;
 import org.archive.crawler.datamodel.credential.Credential;
 import org.archive.crawler.datamodel.credential.CredentialAvatar;
 import org.archive.crawler.framework.Processor;
 import org.archive.crawler.settings.SimpleType;
 import org.archive.crawler.settings.Type;
 import org.archive.net.UURI;
-import org.archive.crawler.util.Mytools;
+
+import javax.management.AttributeNotFoundException;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 /**
  * Ensures the preconditions for a fetch -- such as DNS lookup 
  * or acquiring and respecting a robots.txt policy -- are
@@ -128,6 +119,7 @@ public class PreconditionEnforcer
             return;
         }
 
+        //当curi还有先决条件的时候，或者 未通过凭据认证
         if (!curi.isPrerequisite() && credentialPrecondition(curi)) {
             return;
         }

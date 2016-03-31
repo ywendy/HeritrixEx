@@ -2,12 +2,13 @@
  * Created by cyh on 16-3-14.
  */
 package org.archive.crawler;
-import java.io.File;
-import javax.management.InvalidAttributeValueException;
 import org.archive.crawler.event.CrawlStatusListener;
 import org.archive.crawler.framework.CrawlController;
 import org.archive.crawler.framework.exceptions.InitializationException;
 import org.archive.crawler.settings.XMLSettingsHandler;
+
+import javax.management.InvalidAttributeValueException;
+import java.io.File;
 
 public class StartHeritrix {
     private final static String orderFilePath = "/jobs/CMDjob/order.xml";
@@ -29,6 +30,7 @@ public class StartHeritrix {
             }
 
             handler = new XMLSettingsHandler(file);
+
             handler.initialize();//读取order.xml中的各个配置
 
             controller = new CrawlController();//

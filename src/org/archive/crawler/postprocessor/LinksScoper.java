@@ -25,14 +25,6 @@
  */
 package org.archive.crawler.postprocessor;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.management.AttributeNotFoundException;
-
 import org.apache.commons.httpclient.URIException;
 import org.archive.crawler.datamodel.CandidateURI;
 import org.archive.crawler.datamodel.CrawlURI;
@@ -43,7 +35,13 @@ import org.archive.crawler.extractor.Link;
 import org.archive.crawler.framework.Scoper;
 import org.archive.crawler.settings.SimpleType;
 import org.archive.crawler.settings.Type;
-import org.archive.crawler.util.Mytools;
+
+import javax.management.AttributeNotFoundException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Determine which extracted links are within scope.
