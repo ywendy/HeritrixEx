@@ -23,12 +23,14 @@
  */
 package org.archive.crawler.extractor;
 
+import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.URIException;
 import org.archive.crawler.datamodel.CoreAttributeConstants;
 import org.archive.crawler.datamodel.CrawlURI;
 import org.archive.crawler.datamodel.RobotsHonoringPolicy;
 import org.archive.crawler.settings.SimpleType;
 import org.archive.crawler.settings.Type;
+import org.archive.crawler.util.Mytools;
 import org.archive.io.ReplayCharSequence;
 import org.archive.net.UURI;
 import org.archive.net.UURIFactory;
@@ -37,7 +39,10 @@ import org.archive.util.HttpRecorder;
 import org.archive.util.TextUtils;
 import org.archive.util.UriUtils;
 
+import javax.management.AttributeNotFoundException;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.logging.Level;
@@ -273,14 +278,14 @@ implements CoreAttributeConstants {
             CharSequence attrName = cs.subSequence(attr.start(1),attr.end(1));
             value = TextUtils.unescapeHtml(value);
             if (attr.start(2) > -1) {
-                // HREF
-//                try {
-//                    URL href = new URL(value.toString());
-//                } catch (MalformedURLException e) {
-////                    e.printStackTrace();
+
+//                if(!checkHost(curi.toString(),value.toString()))
+//                {
+//                    Mytools.writeFile("debug.txt","[REJECT] "+value.toString());
+//                    continue;
 //                }
 
-//                Mytools.writeFile("debug.txt","*"+curi.toString()+"#"+value+"*");
+                // HREF
                 CharSequence context =
                     Link.elementContext(element, attr.group(2));
                 if(elementStr.equalsIgnoreCase(LINK)) {
@@ -317,7 +322,7 @@ implements CoreAttributeConstants {
                 }
             } else if (attr.start(4) > -1) {
                 // ON____
-                processScriptCode(curi, value); // TODO: context?
+             //   processScriptCode(curi, value); // TODO: context?
             } else if (attr.start(5) > -1) {
                 // SRC etc.
                 CharSequence context = Link.elementContext(element,
@@ -379,8 +384,8 @@ implements CoreAttributeConstants {
             } else if (attr.start(11) > -1) {
                 // STYLE inline attribute
                 // then, parse for URIs
-                this.numberOfLinksExtracted += ExtractorCSS.processStyleCode(
-                    curi, value, getController());
+//                this.numberOfLinksExtracted += ExtractorCSS.processStyleCode(
+//                    curi, value, getController());
                 
             } else if (attr.start(12) > -1) {
                 // METHOD
@@ -501,6 +506,7 @@ implements CoreAttributeConstants {
      */
     protected void processScriptCode(CrawlURI curi, CharSequence cs) {
         if((Boolean)getUncheckedAttribute(curi, ATTR_EXTRACT_JAVASCRIPT)) {
+
             this.numberOfLinksExtracted +=
                 ExtractorJS.considerStrings(curi, cs, getController(), false);
         } // else do nothing
@@ -523,6 +529,12 @@ implements CoreAttributeConstants {
             if (logger.isLoggable(Level.FINEST)) {
                 logger.finest("link: " + value.toString() + " from " + curi);
             }
+//            if(!checkHost(curi.toString(),value.toString()))
+//            {
+//                Mytools.writeFile("debug.txt","[REJECT] "+value.toString());
+//                return ;
+//            }
+//            Mytools.writeFile("debug.txt","[2PASS] "+value.toString());
             addLinkFromString(curi, value, context, Link.NAVLINK_HOP);
             this.numberOfLinksExtracted++;
         }
@@ -559,6 +571,12 @@ implements CoreAttributeConstants {
             logger.finest("embed (" + hopType + "): " + value.toString() +
                 " from " + curi);
         }
+//        if(!checkHost(curi.toString(),value.toString()))
+//        {
+//            Mytools.writeFile("debug.txt","[REJECT] "+value.toString());
+//            return ;
+//        }
+//        Mytools.writeFile("debug.txt","[1PASS] "+ value);
         addLinkFromString(curi,
             (value instanceof String)?
                 (String)value: value.toString(),
@@ -643,6 +661,7 @@ implements CoreAttributeConstants {
      */
     void extract(CrawlURI curi, CharSequence cs) {
         Matcher tags = TextUtils.getMatcher(RELEVANT_TAG_EXTRACTOR, cs);
+
         while(tags.find()) {
             if(Thread.interrupted()){
                 break;
@@ -652,16 +671,16 @@ implements CoreAttributeConstants {
                 // for now do nothing
             } else if (tags.start(7) > 0) {
                 // <meta> match
-                int start = tags.start(5);
-                int end = tags.end(5);
-                assert start >= 0: "Start is: " + start + ", " + curi;
-                assert end >= 0: "End is :" + end + ", " + curi;
-                if (processMeta(curi,
-                    cs.subSequence(start, end))) {
-
-                    // meta tag included NOFOLLOW; abort processing
-                    break;
-                }
+//                int start = tags.start(5);
+//                int end = tags.end(5);
+//                assert start >= 0: "Start is: " + start + ", " + curi;
+//                assert end >= 0: "End is :" + end + ", " + curi;
+//                if (processMeta(curi,
+//                    cs.subSequence(start, end))) {
+//
+//                    // meta tag included NOFOLLOW; abort processing
+//                    break;
+//                }
             } else if (tags.start(5) > 0) {
                 // generic <whatever> match
                 int start5 = tags.start(5);
@@ -678,25 +697,26 @@ implements CoreAttributeConstants {
 
             } else if (tags.start(1) > 0) {
                 // <script> match
-                int start = tags.start(1);
-                int end = tags.end(1);
-                assert start >= 0: "Start is: " + start + ", " + curi;
-                assert end >= 0: "End is :" + end + ", " + curi;
-                assert tags.end(2) >= 0: "Tags.end(2) illegal " + tags.end(2) +
-                    ", " + curi;
-                processScript(curi, cs.subSequence(start, end),
-                    tags.end(2) - start);
+
+//                int start = tags.start(1);
+//                int end = tags.end(1);
+//                assert start >= 0: "Start is: " + start + ", " + curi;
+//                assert end >= 0: "End is :" + end + ", " + curi;
+//                assert tags.end(2) >= 0: "Tags.end(2) illegal " + tags.end(2) +
+//                    ", " + curi;
+//                processScript(curi, cs.subSequence(start, end),
+//                    tags.end(2) - start);
 
             } else if (tags.start(3) > 0){
                 // <style... match
-                int start = tags.start(3);
-                int end = tags.end(3);
-                assert start >= 0: "Start is: " + start + ", " + curi;
-                assert end >= 0: "End is :" + end + ", " + curi;
-                assert tags.end(4) >= 0: "Tags.end(4) illegal " + tags.end(4) +
-                    ", " + curi;
-                processStyle(curi, cs.subSequence(start, end),
-                    tags.end(4) - start);
+//                int start = tags.start(3);
+//                int end = tags.end(3);
+//                assert start >= 0: "Start is: " + start + ", " + curi;
+//                assert end >= 0: "End is :" + end + ", " + curi;
+//                assert tags.end(4) >= 0: "Tags.end(4) illegal " + tags.end(4) +
+//                    ", " + curi;
+//                processStyle(curi, cs.subSequence(start, end),
+//                    tags.end(4) - start);
             }
         }
         TextUtils.recycleMatcher(tags);
@@ -799,8 +819,8 @@ implements CoreAttributeConstants {
             if(urlIndex>0) {
                 String refreshUri = content.substring(urlIndex);
                 try {
-                    curi.createAndAddLinkRelativeToBase(refreshUri, "meta",
-                        Link.REFER_HOP);
+                        curi.createAndAddLinkRelativeToBase(refreshUri, "meta",
+                                Link.REFER_HOP);
                 } catch (URIException e) {
                     if (getController() != null) {
                         getController().logUriError(e, curi.getUURI(), refreshUri);
@@ -828,10 +848,13 @@ implements CoreAttributeConstants {
         processGeneralTag(curi, sequence.subSequence(0,6),
             sequence.subSequence(0,endOfOpenTag));
 
+//        if((Boolean)getUncheckedAttribute(curi, ATTR_EXTRACT_JAVASCRIPT)) {
+            this.numberOfLinksExtracted += ExtractorCSS.processStyleCode(
+                    curi, sequence.subSequence(endOfOpenTag,sequence.length()),
+                    getController());
+//        }
         // then, parse for URIs
-        this.numberOfLinksExtracted += ExtractorCSS.processStyleCode(
-            curi, sequence.subSequence(endOfOpenTag,sequence.length()),
-                getController());
+
     }
     
 
@@ -847,6 +870,43 @@ implements CoreAttributeConstants {
         ret.append("  Links extracted:   " + this.numberOfLinksExtracted +
             "\n\n");
         return ret.toString();
+    }
+
+    /** 检测pageUrl和extractUrl是否是同一个域名下的,是则返回true否则返回false
+     * @param pageUrl 当前页面的URL
+     * @param extractUrl 从页面中提取出来的URL
+     */
+    private boolean checkHost(String pageUrl,String extractUrl)
+    {
+        try {
+            //如果当前提取到的URL和这个页面的URL的一致，则不提取
+            if(extractUrl == null || extractUrl.length() == 0 || extractUrl.equals("#"))
+            {
+                return false;
+            }
+
+            URI extractUri = new URI(extractUrl);
+            URI pageUri = new URI(pageUrl);
+            if(extractUri.getAuthority() != null)
+            {
+               return extractUri.getAuthority().equals(pageUri.getAuthority());
+            }
+
+            if(extractUri.getPath() == null)
+            {
+//                Mytools.writeFile("debug.txt","[PathNULL] "+extractUrl);
+                return false;
+            }
+            else if(extractUri.getPath().length() != 0)
+            {
+                //相对路径
+                return true;
+            }
+ 
+        }
+        catch (URIException e) {}
+
+        return false;
     }
 
 }
