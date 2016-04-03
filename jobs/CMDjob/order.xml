@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?><crawl-order xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="heritrix_settings.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<crawl-order xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="heritrix_settings.xsd">
   <meta>
     <name>default</name>
     <description>Default Profile</description>
@@ -48,8 +49,14 @@
           </newObject>
           <newObject name="acceptIfPrerequisite" class="org.archive.crawler.deciderules.PrerequisiteAcceptDecideRule">
           </newObject>
+          <newObject name="MatchFilePattern" class="org.archive.crawler.deciderules.MatchesFilePatternDecideRule">
+            <string name="decision">REJECT</string>
+            <string name="use-preset-pattern">All</string>
+            <string name="regexp"/>
+          </newObject>
         </map>
       </newObject>
+
     </newObject>
     <map name="http-headers">
       <string name="user-agent">Mozilla/5.0 (compatible; heritrix/1.14.4 +http://www.baidu.com)</string>

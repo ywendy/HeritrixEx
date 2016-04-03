@@ -529,11 +529,11 @@ implements CoreAttributeConstants {
             if (logger.isLoggable(Level.FINEST)) {
                 logger.finest("link: " + value.toString() + " from " + curi);
             }
-//            if(!checkHost(curi.toString(),value.toString()))
-//            {
+            if(!checkHost(curi.toString(),value.toString()))
+            {
 //                Mytools.writeFile("debug.txt","[REJECT] "+value.toString());
-//                return ;
-//            }
+                return ;
+            }
 //            Mytools.writeFile("debug.txt","[2PASS] "+value.toString());
             addLinkFromString(curi, value, context, Link.NAVLINK_HOP);
             this.numberOfLinksExtracted++;
@@ -571,11 +571,11 @@ implements CoreAttributeConstants {
             logger.finest("embed (" + hopType + "): " + value.toString() +
                 " from " + curi);
         }
-//        if(!checkHost(curi.toString(),value.toString()))
-//        {
+        if(!checkHost(curi.toString(),value.toString()))
+        {
 //            Mytools.writeFile("debug.txt","[REJECT] "+value.toString());
-//            return ;
-//        }
+            return ;
+        }
 //        Mytools.writeFile("debug.txt","[1PASS] "+ value);
         addLinkFromString(curi,
             (value instanceof String)?
@@ -902,7 +902,7 @@ implements CoreAttributeConstants {
                 //相对路径
                 return true;
             }
- 
+
         }
         catch (URIException e) {}
 
