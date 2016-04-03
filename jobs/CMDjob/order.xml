@@ -147,17 +147,17 @@
       </newObject>
     </map>
     <map name="extract-processors">
-      <newObject name="ExtractorHTTP" class="org.archive.crawler.extractor.ExtractorHTTP">
+      <!--newObject name="ExtractorHTTP" class="org.archive.crawler.extractor.ExtractorHTTP">
         <boolean name="enabled">true</boolean>
         <map name="filters">
         </map>
-      </newObject>
+      </newObject-->
       <newObject name="ExtractorHTML" class="org.archive.crawler.extractor.ExtractorHTML">
         <boolean name="enabled">true</boolean>
         <map name="filters">
         </map>
       </newObject>
-      <newObject name="ExtractorCSS" class="org.archive.crawler.extractor.ExtractorCSS">
+      <!--newObject name="ExtractorCSS" class="org.archive.crawler.extractor.ExtractorCSS">
         <boolean name="enabled">true</boolean>
         <map name="filters">
         </map>
@@ -171,7 +171,7 @@
         <boolean name="enabled">true</boolean>
         <map name="filters">
         </map>
-      </newObject>
+      </newObject-->
     </map>
     <map name="write-processors">
       <!--newObject name="Archiver" class="org.archive.crawler.writer.ARCWriterProcessor">
