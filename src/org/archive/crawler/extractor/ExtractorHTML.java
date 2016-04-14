@@ -30,7 +30,6 @@ import org.archive.crawler.datamodel.CrawlURI;
 import org.archive.crawler.datamodel.RobotsHonoringPolicy;
 import org.archive.crawler.settings.SimpleType;
 import org.archive.crawler.settings.Type;
-import org.archive.crawler.util.Mytools;
 import org.archive.io.ReplayCharSequence;
 import org.archive.net.UURI;
 import org.archive.net.UURIFactory;
@@ -39,10 +38,7 @@ import org.archive.util.HttpRecorder;
 import org.archive.util.TextUtils;
 import org.archive.util.UriUtils;
 
-import javax.management.AttributeNotFoundException;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.logging.Level;
@@ -848,11 +844,11 @@ implements CoreAttributeConstants {
         processGeneralTag(curi, sequence.subSequence(0,6),
             sequence.subSequence(0,endOfOpenTag));
 
-//        if((Boolean)getUncheckedAttribute(curi, ATTR_EXTRACT_JAVASCRIPT)) {
-            this.numberOfLinksExtracted += ExtractorCSS.processStyleCode(
-                    curi, sequence.subSequence(endOfOpenTag,sequence.length()),
-                    getController());
-//        }
+//       if((Boolean)getUncheckedAttribute(curi, ATTR_EXTRACT_JAVASCRIPT)) {
+//            this.numberOfLinksExtracted += ExtractorCSS.processStyleCode(
+//                    curi, sequence.subSequence(endOfOpenTag,sequence.length()),
+//                    getController());
+//       }
         // then, parse for URIs
 
     }
@@ -880,7 +876,8 @@ implements CoreAttributeConstants {
     {
         try {
             //如果当前提取到的URL和这个页面的URL的一致，则不提取
-            if(extractUrl == null || extractUrl.length() == 0 || extractUrl.equals("#"))
+            // 或者以#开头，则说明该URL是锚点，同样不提取
+            if (extractUrl == null || extractUrl.length() == 0 || extractUrl.startsWith("#"))
             {
                 return false;
             }
@@ -894,7 +891,6 @@ implements CoreAttributeConstants {
 
             if(extractUri.getPath() == null)
             {
-//                Mytools.writeFile("debug.txt","[PathNULL] "+extractUrl);
                 return false;
             }
             else if(extractUri.getPath().length() != 0)
