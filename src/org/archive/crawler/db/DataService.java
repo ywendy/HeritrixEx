@@ -31,7 +31,7 @@ public class DataService {
                         props.getProperty("PASSWORD")
                 );
 
-                System.out.println("数据库成功连接");
+                System.out.println("数据库连接成功");
             } catch (ClassNotFoundException e) {
                 System.err.println("JDBC路径未找到");
                 System.exit(-1);
