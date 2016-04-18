@@ -24,36 +24,24 @@
  */
 package org.archive.crawler.writer;
 
+import org.archive.crawler.datamodel.CoreAttributeConstants;
+import org.archive.crawler.datamodel.CrawlURI;
+import org.archive.crawler.framework.Processor;
+import org.archive.crawler.settings.*;
+import org.archive.io.RecordingInputStream;
+import org.archive.io.ReplayInputStream;
+import org.archive.net.UURI;
+import org.archive.util.IoUtils;
+
+import javax.management.AttributeNotFoundException;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.text.NumberFormat;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import javax.management.AttributeNotFoundException;
-
-import org.archive.crawler.datamodel.CoreAttributeConstants;
-import org.archive.crawler.datamodel.CrawlURI;
-import org.archive.crawler.framework.Processor;
-import org.archive.crawler.settings.ListType;
-import org.archive.crawler.settings.RegularExpressionConstraint;
-import org.archive.crawler.settings.SimpleType;
-import org.archive.crawler.settings.StringList;
-import org.archive.crawler.settings.Type;
-import org.archive.crawler.util.Mytools;
-import org.archive.io.RecordingInputStream;
-import org.archive.io.ReplayInputStream;
-import org.archive.net.UURI;
-import org.archive.util.IoUtils;
 
 /**
    Processor module that writes the results of successful fetches to
@@ -208,6 +196,7 @@ extends Processor implements CoreAttributeConstants {
         Logger.getLogger(MirrorWriterProcessor.class.getName());
 
     /**
+     * @param s
      * @param name Name of this processor.
      */
     public MirrorWriterProcessor(String name) {
