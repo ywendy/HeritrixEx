@@ -23,16 +23,15 @@
  */
 package org.archive.crawler.framework;
 
-import java.lang.reflect.Constructor;
-import java.util.logging.Logger;
-
-import javax.management.AttributeNotFoundException;
-
 import org.archive.crawler.datamodel.CrawlURI;
 import org.archive.crawler.deciderules.DecideRule;
 import org.archive.crawler.deciderules.DecideRuleSequence;
 import org.archive.crawler.settings.ModuleType;
 import org.archive.crawler.settings.SimpleType;
+
+import javax.management.AttributeNotFoundException;
+import java.lang.reflect.Constructor;
+import java.util.logging.Logger;
 
 /**
  * Base class for URI processing classes.
@@ -268,6 +267,27 @@ public class Processor extends ModuleType {
             contentType.toLowerCase().startsWith(expectedPrefix);
     }
 
+    /**
+     * 判断是否是Html的contentType
+     *
+     * @param contentType Found content type
+     */
+    protected boolean isHtmlMimeType(String contentType) {
+        return (isExpectedMimeType(contentType, "text/html")
+                || isExpectedMimeType(contentType, "application/xhtml")
+                || isExpectedMimeType(contentType, "text/vnd.wap.wml")
+                || isExpectedMimeType(contentType, "application/vnd.wap.wml")
+                || isExpectedMimeType(contentType, "application/vnd.wap.xhtml"));
+    }
+
+    /**
+     * 判断是否是robots
+     *
+     * @param curi
+     */
+    protected boolean isRobots(CrawlURI curi) {
+        return curi.toString().toLowerCase().contains("robots.");
+    }
     public void kickUpdate() {
         // by default do nothing
     }

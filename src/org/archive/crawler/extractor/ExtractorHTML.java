@@ -27,6 +27,7 @@ import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.URIException;
 import org.archive.crawler.datamodel.CoreAttributeConstants;
 import org.archive.crawler.datamodel.CrawlURI;
+import org.archive.crawler.datamodel.FetchStatusCodes;
 import org.archive.crawler.datamodel.RobotsHonoringPolicy;
 import org.archive.crawler.settings.SimpleType;
 import org.archive.crawler.settings.Type;
@@ -50,19 +51,18 @@ import java.util.regex.Matcher;
  * using regular expressions.
  *
  * @author gojomo
- *
  */
 public class ExtractorHTML extends Extractor
-implements CoreAttributeConstants {
+        implements CoreAttributeConstants, FetchStatusCodes {
 
     private static final long serialVersionUID = 5855731422080471017L;
 
     private static Logger logger =
-        Logger.getLogger(ExtractorHTML.class.getName());
+            Logger.getLogger(ExtractorHTML.class.getName());
 
     /**
      * Compiled relevant tag extractor.
-     *
+     * <p>
      * <p>
      * This pattern extracts either:
      * <li> (1) whole &lt;script&gt;...&lt;/script&gt; or
@@ -82,22 +82,21 @@ implements CoreAttributeConstants {
      * <li> 8: !-- comment --
      */
 // version w/ less unnecessary backtracking
-      private static final int MAX_ELEMENT_LENGTH =
-          Integer.parseInt(System.getProperty(ExtractorHTML.class.getName() +
-              ".maxElementNameLength", "1024"));
-      
-      static final String RELEVANT_TAG_EXTRACTOR =
-          "(?is)<(?:((script[^>]*+)>.*?</script)" + // 1, 2
-          "|((style[^>]*+)>.*?</style)" + // 3, 4
-          "|(((meta)|(?:\\w{1,"+MAX_ELEMENT_LENGTH+"}))\\s+[^>]*+)" + // 5, 6, 7
-          "|(!--.*?--))>"; // 8 
+    private static final int MAX_ELEMENT_LENGTH =
+            Integer.parseInt(System.getProperty(ExtractorHTML.class.getName() +
+                    ".maxElementNameLength", "1024"));
+
+    static final String RELEVANT_TAG_EXTRACTOR =
+            "(?is)<(?:((script[^>]*+)>.*?</script)" + // 1, 2
+                    "|((style[^>]*+)>.*?</style)" + // 3, 4
+                    "|(((meta)|(?:\\w{1," + MAX_ELEMENT_LENGTH + "}))\\s+[^>]*+)" + // 5, 6, 7
+                    "|(!--.*?--))>"; // 8
 
 //    version w/ problems with unclosed script tags 
 //    static final String RELEVANT_TAG_EXTRACTOR =
 //    "(?is)<(?:((script.*?)>.*?</script)|((style.*?)>.*?</style)|(((meta)|(?:\\w+))\\s+.*?)|(!--.*?--))>";
 
 
-      
 //    // this pattern extracts 'href' or 'src' attributes from
 //    // any open-tag innards matched by the above
 //    static Pattern RELEVANT_ATTRIBUTE_EXTRACTOR = Pattern.compile(
@@ -107,30 +106,30 @@ implements CoreAttributeConstants {
 //    static Pattern ROBOTS_ATTRIBUTE_EXTRACTOR = Pattern.compile(
 //     "(?is)(\\w+)\\s+.*?(?:(robots))\\s*=(?:(?:\\s*\"(.+)\")|(?:\\s*'(.+)')|(\\S+))");
 
-      private static final int MAX_ATTR_NAME_LENGTH =
-          Integer.parseInt(System.getProperty(ExtractorHTML.class.getName() +
-              ".maxAttributeNameLength", "1024")); // 1K; 
-      
-      static final int MAX_ATTR_VAL_LENGTH = 
-          Integer.parseInt(System.getProperty(ExtractorHTML.class.getName() +
-              ".maxAttributeValueLength", "16384")); // 16K; 
-      
+    private static final int MAX_ATTR_NAME_LENGTH =
+            Integer.parseInt(System.getProperty(ExtractorHTML.class.getName() +
+                    ".maxAttributeNameLength", "1024")); // 1K;
+
+    static final int MAX_ATTR_VAL_LENGTH =
+            Integer.parseInt(System.getProperty(ExtractorHTML.class.getName() +
+                    ".maxAttributeValueLength", "16384")); // 16K;
+
     // TODO: perhaps cut to near MAX_URI_LENGTH
-    
+
     // this pattern extracts attributes from any open-tag innards
     // matched by the above. attributes known to be URIs of various
     // sorts are matched specially
     static final String EACH_ATTRIBUTE_EXTRACTOR =
-      "(?is)\\b((href)|(action)|(on\\w*)" // 1, 2, 3, 4 
-     +"|((?:src)|(?:lowsrc)|(?:background)|(?:cite)|(?:longdesc)" // ...
-     +"|(?:usemap)|(?:profile)|(?:datasrc))" // 5
-     +"|(codebase)|((?:classid)|(?:data))|(archive)|(code)" // 6, 7, 8, 9
-     +"|(value)|(style)|(method)" // 10, 11, 12
-     +"|([-\\w]{1,"+MAX_ATTR_NAME_LENGTH+"}))" // 13
-     +"\\s*=\\s*"
-     +"(?:(?:\"(.{0,"+MAX_ATTR_VAL_LENGTH+"}?)(?:\"|$))" // 14
-     +"|(?:'(.{0,"+MAX_ATTR_VAL_LENGTH+"}?)(?:'|$))" // 15
-     +"|(\\S{1,"+MAX_ATTR_VAL_LENGTH+"}))"; // 16
+            "(?is)\\b((href)|(action)|(on\\w*)" // 1, 2, 3, 4
+                    + "|((?:src)|(?:lowsrc)|(?:background)|(?:cite)|(?:longdesc)" // ...
+                    + "|(?:usemap)|(?:profile)|(?:datasrc))" // 5
+                    + "|(codebase)|((?:classid)|(?:data))|(archive)|(code)" // 6, 7, 8, 9
+                    + "|(value)|(style)|(method)" // 10, 11, 12
+                    + "|([-\\w]{1," + MAX_ATTR_NAME_LENGTH + "}))" // 13
+                    + "\\s*=\\s*"
+                    + "(?:(?:\"(.{0," + MAX_ATTR_VAL_LENGTH + "}?)(?:\"|$))" // 14
+                    + "|(?:'(.{0," + MAX_ATTR_VAL_LENGTH + "}?)(?:'|$))" // 15
+                    + "|(\\S{1," + MAX_ATTR_VAL_LENGTH + "}))"; // 16
     // groups:
     // 1: attribute name
     // 2: HREF - single URI relative to doc base, or occasionally javascript:
@@ -153,7 +152,7 @@ implements CoreAttributeConstants {
     // 16: space-delimited attr value
 
     static final String WHITESPACE = "\\s";
-    static final String CLASSEXT =".class";
+    static final String CLASSEXT = ".class";
     static final String APPLET = "applet";
     static final String BASE = "base";
     static final String LINK = "link";
@@ -161,117 +160,119 @@ implements CoreAttributeConstants {
     static final String IFRAME = "iframe";
 
     public static final String ATTR_TREAT_FRAMES_AS_EMBED_LINKS =
-        "treat-frames-as-embed-links";
-    
+            "treat-frames-as-embed-links";
+
     public static final String ATTR_IGNORE_FORM_ACTION_URLS =
-        "ignore-form-action-urls";
+            "ignore-form-action-urls";
 
     public static final String ATTR_EXTRACT_ONLY_FORM_GETS =
-        "extract-only-form-gets";
+            "extract-only-form-gets";
 
-    /** whether to try finding links in Javscript; default true */
+    /**
+     * whether to try finding links in Javscript; default true
+     */
     public static final String ATTR_EXTRACT_JAVASCRIPT =
-        "extract-javascript";
+            "extract-javascript";
 
     public static final String EXTRACT_VALUE_ATTRIBUTES =
-        "extract-value-attributes";
-    
-    public static final String ATTR_IGNORE_UNEXPECTED_HTML = 
-        "ignore-unexpected-html";
+            "extract-value-attributes";
 
-    
+    public static final String ATTR_IGNORE_UNEXPECTED_HTML =
+            "ignore-unexpected-html";
+
+
     protected long numberOfCURIsHandled = 0;
     protected long numberOfLinksExtracted = 0;
 
     public ExtractorHTML(String name) {
         this(name, "HTML extractor. Extracts links from HTML documents");
     }
-    
+
     public ExtractorHTML(String name, String description) {
         super(name, description);
         Type t = addElementToDefinition(
-            new SimpleType(ATTR_EXTRACT_JAVASCRIPT,
-            "If true, in-page Javascript is scanned for strings that " +
-            "appear likely to be URIs. This typically finds both valid " +
-            "and invalid URIs, and attempts to fetch the invalid URIs " +
-            "sometimes generates webmaster concerns over odd crawler " +
-            "behavior. Default is true.",
-            Boolean.TRUE));
+                new SimpleType(ATTR_EXTRACT_JAVASCRIPT,
+                        "If true, in-page Javascript is scanned for strings that " +
+                                "appear likely to be URIs. This typically finds both valid " +
+                                "and invalid URIs, and attempts to fetch the invalid URIs " +
+                                "sometimes generates webmaster concerns over odd crawler " +
+                                "behavior. Default is true.",
+                        Boolean.TRUE));
         t.setExpertSetting(true);
         t = addElementToDefinition(
-            new SimpleType(ATTR_TREAT_FRAMES_AS_EMBED_LINKS,
-            "If true, FRAME/IFRAME SRC-links are treated as embedded " +
-            "resources (like IMG, 'E' hop-type), otherwise they are " +
-            "treated as navigational links. Default is true.", Boolean.TRUE));
+                new SimpleType(ATTR_TREAT_FRAMES_AS_EMBED_LINKS,
+                        "If true, FRAME/IFRAME SRC-links are treated as embedded " +
+                                "resources (like IMG, 'E' hop-type), otherwise they are " +
+                                "treated as navigational links. Default is true.", Boolean.TRUE));
         t.setExpertSetting(true);
         t = addElementToDefinition(
-            new SimpleType(ATTR_IGNORE_FORM_ACTION_URLS,
-            "If true, URIs appearing as the ACTION attribute in " +
-            "HTML FORMs are ignored. Default is false.", Boolean.FALSE));
+                new SimpleType(ATTR_IGNORE_FORM_ACTION_URLS,
+                        "If true, URIs appearing as the ACTION attribute in " +
+                                "HTML FORMs are ignored. Default is false.", Boolean.FALSE));
         t.setExpertSetting(true);
         t = addElementToDefinition(
                 new SimpleType(ATTR_EXTRACT_ONLY_FORM_GETS,
-                "If true, only HTML FORM ACTIONs associated with the GET "+ 
-                "method are extracted. (Form ACTIONs with method POST "+
-                "will be ignored. Default is true", Boolean.TRUE));
+                        "If true, only HTML FORM ACTIONs associated with the GET " +
+                                "method are extracted. (Form ACTIONs with method POST " +
+                                "will be ignored. Default is true", Boolean.TRUE));
         t.setExpertSetting(true);
         t = addElementToDefinition(
-            new SimpleType(EXTRACT_VALUE_ATTRIBUTES,
-            "If true, strings that look like URIs found in element VALUE " +
-            "attributes (which are sometimes used as URIs by in-page " +
-            "Javascript or server-side redirects) will be extracted. " +
-            "This typically finds both valid and invalid URIs, and " +
-            "attempts to fetch the invalid URIs sometimes generate " +
-            "webmaster concerns over odd crawler behavior. Default " +
-            "is true.",
-            Boolean.TRUE));
+                new SimpleType(EXTRACT_VALUE_ATTRIBUTES,
+                        "If true, strings that look like URIs found in element VALUE " +
+                                "attributes (which are sometimes used as URIs by in-page " +
+                                "Javascript or server-side redirects) will be extracted. " +
+                                "This typically finds both valid and invalid URIs, and " +
+                                "attempts to fetch the invalid URIs sometimes generate " +
+                                "webmaster concerns over odd crawler behavior. Default " +
+                                "is true.",
+                        Boolean.TRUE));
         t.setExpertSetting(true);
         t = addElementToDefinition(
-            new SimpleType(ATTR_IGNORE_UNEXPECTED_HTML,
-            "If true, URIs which end in typical non-HTML extensions " +
-            "(such as .gif) will not be scanned as if it were HTML. " +
-            "Default is true.", Boolean.TRUE));
+                new SimpleType(ATTR_IGNORE_UNEXPECTED_HTML,
+                        "If true, URIs which end in typical non-HTML extensions " +
+                                "(such as .gif) will not be scanned as if it were HTML. " +
+                                "Default is true.", Boolean.TRUE));
         t.setExpertSetting(true);
     }
 
     protected void processGeneralTag(CrawlURI curi, CharSequence element,
-            CharSequence cs) {
+                                     CharSequence cs) {
 
         Matcher attr = TextUtils.getMatcher(EACH_ATTRIBUTE_EXTRACTOR, cs);
 
         // Just in case it's an OBJECT or APPLET tag
         String codebase = null;
         ArrayList<String> resources = null;
-        
+
         // Just in case it's a FORM
         CharSequence action = null;
         CharSequence actionContext = null;
-        CharSequence method = null; 
-        
-        // Just in case it's a VALUE whose interpretation depends on accompanying NAME
-        CharSequence valueVal = null; 
-        CharSequence valueContext = null;
-        CharSequence nameVal = null; 
-        String a;
-        final boolean framesAsEmbeds = ((Boolean)getUncheckedAttribute(curi,
-            ATTR_TREAT_FRAMES_AS_EMBED_LINKS)).booleanValue();
+        CharSequence method = null;
 
-        final boolean ignoreFormActions = ((Boolean)getUncheckedAttribute(curi,
+        // Just in case it's a VALUE whose interpretation depends on accompanying NAME
+        CharSequence valueVal = null;
+        CharSequence valueContext = null;
+        CharSequence nameVal = null;
+        String a;
+        final boolean framesAsEmbeds = ((Boolean) getUncheckedAttribute(curi,
+                ATTR_TREAT_FRAMES_AS_EMBED_LINKS)).booleanValue();
+
+        final boolean ignoreFormActions = ((Boolean) getUncheckedAttribute(curi,
                 ATTR_IGNORE_FORM_ACTION_URLS)).booleanValue();
-        
-        final boolean extractValueAttributes = ((Boolean)getUncheckedAttribute
+
+        final boolean extractValueAttributes = ((Boolean) getUncheckedAttribute
                 (curi, EXTRACT_VALUE_ATTRIBUTES)).booleanValue();
-        
+
         final String elementStr = element.toString();
         while (attr.find()) {
             int valueGroup =
-                (attr.start(14) > -1) ? 14 : (attr.start(15) > -1) ? 15 : 16;
+                    (attr.start(14) > -1) ? 14 : (attr.start(15) > -1) ? 15 : 16;
             int start = attr.start(valueGroup);
             int end = attr.end(valueGroup);
-            assert start >= 0: "Start is: " + start + ", " + curi;
-            assert end >= 0: "End is :" + end + ", " + curi;
+            assert start >= 0 : "Start is: " + start + ", " + curi;
+            assert end >= 0 : "End is :" + end + ", " + curi;
             CharSequence value = cs.subSequence(start, end);
-            CharSequence attrName = cs.subSequence(attr.start(1),attr.end(1));
+            CharSequence attrName = cs.subSequence(attr.start(1), attr.end(1));
             value = TextUtils.unescapeHtml(value);
             if (attr.start(2) > -1) {
 
@@ -283,8 +284,8 @@ implements CoreAttributeConstants {
 
                 // HREF
                 CharSequence context =
-                    Link.elementContext(element, attr.group(2));
-                if(elementStr.equalsIgnoreCase(LINK)) {
+                        Link.elementContext(element, attr.group(2));
+                if (elementStr.equalsIgnoreCase(LINK)) {
                     // <LINK> elements treated as embeds (css, ico, etc)
 
                     processEmbed(curi, value, context);
@@ -300,37 +301,37 @@ implements CoreAttributeConstants {
                             // Controller can be null: e.g. when running
                             // ExtractorTool.
                             getController().logUriError(e, curi.getUURI(),
-                                value.toString());
+                                    value.toString());
                         } else {
                             logger.info("Failed set base uri: " +
-                                curi + ", " + value.toString() + ": " +
-                                e.getMessage());
+                                    curi + ", " + value.toString() + ": " +
+                                    e.getMessage());
                         }
                     }
                 }
             } else if (attr.start(3) > -1) {
                 // ACTION
                 if (!ignoreFormActions) {
-                    action = value; 
+                    action = value;
                     actionContext = Link.elementContext(element,
-                        attr.group(3));
+                            attr.group(3));
                     // handling finished only at end (after METHOD also collected)
                 }
             } else if (attr.start(4) > -1) {
                 // ON____
-             //   processScriptCode(curi, value); // TODO: context?
+                //   processScriptCode(curi, value); // TODO: context?
             } else if (attr.start(5) > -1) {
                 // SRC etc.
                 CharSequence context = Link.elementContext(element,
-                    attr.group(5));
-                
+                        attr.group(5));
+
                 // true, if we expect another HTML page instead of an image etc.
                 // TODO: add explicit 'F'rame hop type? (it's not really L, and
                 // different enough from other 'E's)
                 final char hopType;
-                
-                if(!framesAsEmbeds
-                    && (elementStr.equalsIgnoreCase(FRAME) || elementStr
+
+                if (!framesAsEmbeds
+                        && (elementStr.equalsIgnoreCase(FRAME) || elementStr
                         .equalsIgnoreCase(IFRAME))) {
                     hopType = Link.NAVLINK_HOP;
                 } else {
@@ -339,10 +340,10 @@ implements CoreAttributeConstants {
                 processEmbed(curi, value, context, hopType);
             } else if (attr.start(6) > -1) {
                 // CODEBASE
-                codebase = (value instanceof String)?
-                    (String)value: value.toString();
+                codebase = (value instanceof String) ?
+                        (String) value : value.toString();
                 CharSequence context = Link.elementContext(element,
-                    attr.group(6));
+                        attr.group(6));
                 processEmbed(curi, codebase, context);
             } else if (attr.start(7) > -1) {
                 // CLASSID, DATA
@@ -352,16 +353,16 @@ implements CoreAttributeConstants {
                 resources.add(value.toString());
             } else if (attr.start(8) > -1) {
                 // ARCHIVE
-                if (resources==null) {
+                if (resources == null) {
                     resources = new ArrayList<String>();
                 }
                 String[] multi = TextUtils.split(WHITESPACE, value);
-                for(int i = 0; i < multi.length; i++ ) {
+                for (int i = 0; i < multi.length; i++) {
                     resources.add(multi[i]);
                 }
             } else if (attr.start(9) > -1) {
                 // CODE
-                if (resources==null) {
+                if (resources == null) {
                     resources = new ArrayList<String>();
                 }
                 // If element is applet and code value does not end with
@@ -375,27 +376,27 @@ implements CoreAttributeConstants {
             } else if (attr.start(10) > -1) {
                 // VALUE, with possibility of URI
                 // store value, context for handling at end
-                valueVal = value; 
-                valueContext = Link.elementContext(element,attr.group(10));
+                valueVal = value;
+                valueContext = Link.elementContext(element, attr.group(10));
             } else if (attr.start(11) > -1) {
                 // STYLE inline attribute
                 // then, parse for URIs
 //                this.numberOfLinksExtracted += ExtractorCSS.processStyleCode(
 //                    curi, value, getController());
-                
+
             } else if (attr.start(12) > -1) {
                 // METHOD
                 method = value;
                 // form processing finished at end (after ACTION also collected)
             } else if (attr.start(13) > -1) {
-                if("NAME".equalsIgnoreCase(attrName.toString())) {
+                if ("NAME".equalsIgnoreCase(attrName.toString())) {
                     // remember 'name' for end-analysis
-                    nameVal = value; 
+                    nameVal = value;
                 }
-                if("FLASHVARS".equalsIgnoreCase(attrName.toString())) {
+                if ("FLASHVARS".equalsIgnoreCase(attrName.toString())) {
                     // consider FLASHVARS attribute immediately
-                    valueContext = Link.elementContext(element,attr.group(13));
-                    considerQueryStringValues(curi, value, valueContext,Link.SPECULATIVE_HOP);
+                    valueContext = Link.elementContext(element, attr.group(13));
+                    considerQueryStringValues(curi, value, valueContext, Link.SPECULATIVE_HOP);
                 }
                 // any other attribute
                 // ignore for now
@@ -415,9 +416,9 @@ implements CoreAttributeConstants {
                 if (codebase != null) {
                     // TODO: Pass in the charset.
                     codebaseURI = UURIFactory.
-                        getInstance(curi.getUURI(), codebase);
+                            getInstance(curi.getUURI(), codebase);
                 }
-                while(iter.hasNext()) {
+                while (iter.hasNext()) {
                     res = iter.next().toString();
                     res = (String) TextUtils.unescapeHtml(res);
                     if (codebaseURI != null) {
@@ -429,31 +430,31 @@ implements CoreAttributeConstants {
                 curi.addLocalizedError(getName(), e, "BAD CODEBASE " + codebase);
             } catch (IllegalArgumentException e) {
                 DevUtils.logger.log(Level.WARNING, "processGeneralTag()\n" +
-                    "codebase=" + codebase + " res=" + res + "\n" +
-                    DevUtils.extraInfo(), e);
+                        "codebase=" + codebase + " res=" + res + "\n" +
+                        DevUtils.extraInfo(), e);
             }
         }
-        
+
         // finish handling form action, now method is available
-        if(action != null) {
-            if(method == null || "GET".equalsIgnoreCase(method.toString()) 
-                    || ! ((Boolean)getUncheckedAttribute(curi,
-                            ATTR_EXTRACT_ONLY_FORM_GETS)).booleanValue()) {
+        if (action != null) {
+            if (method == null || "GET".equalsIgnoreCase(method.toString())
+                    || !((Boolean) getUncheckedAttribute(curi,
+                    ATTR_EXTRACT_ONLY_FORM_GETS)).booleanValue()) {
                 processLink(curi, action, actionContext);
             }
         }
-        
+
         // finish handling VALUE
-        if(valueVal != null) {
-            if("PARAM".equalsIgnoreCase(elementStr) && "flashvars".equalsIgnoreCase(nameVal.toString())) {
+        if (valueVal != null) {
+            if ("PARAM".equalsIgnoreCase(elementStr) && "flashvars".equalsIgnoreCase(nameVal.toString())) {
                 // special handling for <PARAM NAME='flashvars" VALUE="">
                 String queryStringLike = valueVal.toString();
                 // treat value as query-string-like "key=value[;key=value]*" pairings
-                considerQueryStringValues(curi, queryStringLike, valueContext,Link.SPECULATIVE_HOP);
+                considerQueryStringValues(curi, queryStringLike, valueContext, Link.SPECULATIVE_HOP);
             } else {
                 // regular VALUE handling
                 if (extractValueAttributes) {
-                    considerIfLikelyUri(curi,valueVal,valueContext,Link.NAVLINK_HOP);
+                    considerIfLikelyUri(curi, valueVal, valueContext, Link.NAVLINK_HOP);
                 }
             }
         }
@@ -462,49 +463,48 @@ implements CoreAttributeConstants {
     /**
      * Consider a query-string-like collections of key=value[;key=value]
      * pairs for URI-like strings in the values. Where URI-like strings are
-     * found, add as discovered outlink. 
-     * 
-     * @param curi origin CrawlURI
-     * @param queryString query-string-like string
+     * found, add as discovered outlink.
+     *
+     * @param curi         origin CrawlURI
+     * @param queryString  query-string-like string
      * @param valueContext page context where found
      */
     protected void considerQueryStringValues(CrawlURI curi,
-            CharSequence queryString, CharSequence valueContext, char hopType) {
-        for(String pairString : queryString.toString().split(";")) {
+                                             CharSequence queryString, CharSequence valueContext, char hopType) {
+        for (String pairString : queryString.toString().split(";")) {
             String[] keyVal = pairString.split("=");
-            if(keyVal.length==2) {
-                considerIfLikelyUri(curi,keyVal[1],valueContext, hopType);
+            if (keyVal.length == 2) {
+                considerIfLikelyUri(curi, keyVal[1], valueContext, hopType);
             }
         }
     }
 
     /**
-     * Consider whether a given string is URI-like. If so, add as discovered 
-     * outlink. 
-     * 
-     * @param curi origin CrawlURI
-     * @param candidate query-string-like string
+     * Consider whether a given string is URI-like. If so, add as discovered
+     * outlink.
+     *
+     * @param curi         origin CrawlURI
+     * @param candidate    query-string-like string
      * @param valueContext page context where found
-
      */
-    protected void considerIfLikelyUri(CrawlURI curi, CharSequence candidate, 
-            CharSequence valueContext, char hopType) {
-        if(UriUtils.isLikelyUriHtmlContextLegacy(candidate)) {
-            addLinkFromString(curi,candidate,valueContext,hopType);
+    protected void considerIfLikelyUri(CrawlURI curi, CharSequence candidate,
+                                       CharSequence valueContext, char hopType) {
+        if (UriUtils.isLikelyUriHtmlContextLegacy(candidate)) {
+            addLinkFromString(curi, candidate, valueContext, hopType);
         }
     }
 
     /**
-     * Extract the (java)script source in the given CharSequence. 
-     * 
+     * Extract the (java)script source in the given CharSequence.
+     *
      * @param curi source CrawlURI
-     * @param cs CharSequence of javascript code
+     * @param cs   CharSequence of javascript code
      */
     protected void processScriptCode(CrawlURI curi, CharSequence cs) {
-        if((Boolean)getUncheckedAttribute(curi, ATTR_EXTRACT_JAVASCRIPT)) {
+        if ((Boolean) getUncheckedAttribute(curi, ATTR_EXTRACT_JAVASCRIPT)) {
 
             this.numberOfLinksExtracted +=
-                ExtractorJS.considerStrings(curi, cs, getController(), false);
+                    ExtractorJS.considerStrings(curi, cs, getController(), false);
         } // else do nothing
     }
 
@@ -512,23 +512,22 @@ implements CoreAttributeConstants {
 
     /**
      * Handle generic HREF cases.
-     * 
+     *
      * @param curi
      * @param value
      * @param context
      */
     protected void processLink(CrawlURI curi, final CharSequence value,
-            CharSequence context) {
+                               CharSequence context) {
         if (TextUtils.matches(JAVASCRIPT, value)) {
-            processScriptCode(curi, value. subSequence(11, value.length()));
-        } else {    
+            processScriptCode(curi, value.subSequence(11, value.length()));
+        } else {
             if (logger.isLoggable(Level.FINEST)) {
                 logger.finest("link: " + value.toString() + " from " + curi);
             }
-            if(!checkHost(curi.toString(),value.toString()))
-            {
+            if (!checkHost(curi.toString(), value.toString())) {
 //                Mytools.writeFile("debug.txt","[REJECT] "+value.toString());
-                return ;
+                return;
             }
 //            Mytools.writeFile("debug.txt","[2PASS] "+value.toString());
             addLinkFromString(curi, value, context, Link.NAVLINK_HOP);
@@ -536,67 +535,108 @@ implements CoreAttributeConstants {
         }
     }
 
+    static final String NON_HTML_PATH_EXTENSION =
+            "(?i)(gif)|(jp(e)?g)|(png)|(tif(f)?)|(bmp)|(avi)|(mov)|(mp(e)?g)" +
+                    "|(mp3)|(mp4)|(swf)|(wav)|(au)|(aiff)|(mid)";
+
+    private static final String rejectsuffix;
+
+    static {
+        rejectsuffix = NON_HTML_PATH_EXTENSION + "|(css)|(js)";
+    }
+
+    /**
+     * 后缀是否在拒绝列表里面，如jpg，mp4,css,js等. 不符合格式的不进入队列
+     *
+     * @param path
+     * @return
+     */
+    private boolean isRejectSuffix(String path) {
+        if (path == null) {
+            // no path extension, HTML is fine
+            return false;
+        }
+
+        int dot = path.lastIndexOf('.');
+        if (dot < 0) {
+            // no path extension, HTML is fine
+            return false;
+        }
+        if (dot < (path.length() - 5)) {
+            // extension too long to recognize, HTML is fine
+            return false;
+        }
+        String ext = path.substring(dot + 1);
+        return TextUtils.matches(rejectsuffix, ext);
+    }
+
     protected void addLinkFromString(CrawlURI curi, CharSequence uri,
-            CharSequence context, char hopType) {
+                                     CharSequence context, char hopType) {
+
+        if (isRejectSuffix(uri.toString())) {
+            return;
+        }
+
         try {
             // We do a 'toString' on context because its a sequence from
             // the underlying ReplayCharSequence and the link its about
             // to become a part of is expected to outlive the current
             // ReplayCharSequence.
             curi.createAndAddLinkRelativeToBase(uri.toString(), context.toString(),
-                hopType);
+                    hopType);
         } catch (URIException e) {
             if (getController() != null) {
                 getController().logUriError(e, curi.getUURI(), uri);
             } else {
                 logger.info("Failed createAndAddLinkRelativeToBase " +
-                    curi + ", " + uri + ", " + context + ", " + hopType +
-                    ": " + e);
+                        curi + ", " + uri + ", " + context + ", " + hopType +
+                        ": " + e);
             }
         }
     }
 
     protected final void processEmbed(CrawlURI curi, CharSequence value,
-            CharSequence context) {
+                                      CharSequence context) {
         processEmbed(curi, value, context, Link.EMBED_HOP);
     }
 
     protected void processEmbed(CrawlURI curi, final CharSequence value,
-            CharSequence context, char hopType) {
+                                CharSequence context, char hopType) {
         if (logger.isLoggable(Level.FINEST)) {
             logger.finest("embed (" + hopType + "): " + value.toString() +
-                " from " + curi);
+                    " from " + curi);
         }
-        if(!checkHost(curi.toString(),value.toString()))
-        {
+        if (!checkHost(curi.toString(), value.toString())) {
 //            Mytools.writeFile("debug.txt","[REJECT] "+value.toString());
-            return ;
+            return;
         }
 //        Mytools.writeFile("debug.txt","[1PASS] "+ value);
         addLinkFromString(curi,
-            (value instanceof String)?
-                (String)value: value.toString(),
-            context, hopType);
+                (value instanceof String) ?
+                        (String) value : value.toString(),
+                context, hopType);
         this.numberOfLinksExtracted++;
     }
 
     public void extract(CrawlURI curi) {
-        if (!isHttpTransactionContentToProcess(curi) ||
-                ! (isExpectedMimeType(curi.getContentType(), "text/html")
-                   || isExpectedMimeType(curi.getContentType(), "application/xhtml")
-                   || isExpectedMimeType(curi.getContentType(), "text/vnd.wap.wml")
-                   || isExpectedMimeType(curi.getContentType(), "application/vnd.wap.wml")
-                   || isExpectedMimeType(curi.getContentType(), "application/vnd.wap.xhtml"))) {
+        if (!isHttpTransactionContentToProcess(curi)) {
+            return;
+        }
+        /*如果不是html页面，则直接不经过write process*/
+        if (!isHtmlMimeType(curi.getContentType()) && !isRobots(curi)) {
+            curi.setFetchStatus(S_DELETED_BY_USER);
+            curi.skipToProcessorChain(getController().
+                    getPostprocessorChain());
             return;
         }
 
         final boolean ignoreUnexpectedHTML =
-             ((Boolean)getUncheckedAttribute(curi, 
-                 ATTR_IGNORE_UNEXPECTED_HTML)).booleanValue();        
+                ((Boolean) getUncheckedAttribute(curi,
+                        ATTR_IGNORE_UNEXPECTED_HTML)).booleanValue();
 
         if (ignoreUnexpectedHTML) {
             try {
-                if(!isHtmlExpectedHere(curi)) {
+                if (!isHtmlExpectedHere(curi)) {
                     // HTML was not expected (eg a GIF was expected) so ignore
                     // (as if a soft 404)
                     return;
@@ -609,21 +649,21 @@ implements CoreAttributeConstants {
         this.numberOfCURIsHandled++;
 
         ReplayCharSequence cs = null;
-        
+
         try {
-           HttpRecorder hr = curi.getHttpRecorder();
-           if (hr == null) {
-               throw new IOException("Why is recorder null here?");
-           }
-           cs = hr.getReplayCharSequence();
+            HttpRecorder hr = curi.getHttpRecorder();
+            if (hr == null) {
+                throw new IOException("Why is recorder null here?");
+            }
+            cs = hr.getReplayCharSequence();
         } catch (IOException e) {
             curi.addLocalizedError(this.getName(), e,
-                "Failed get of replay char sequence " + curi.toString() +
-                    " " + e.getMessage());
-            logger.log(Level.SEVERE,"Failed get of replay char sequence in " +
-                Thread.currentThread().getName(), e);
+                    "Failed get of replay char sequence " + curi.toString() +
+                            " " + e.getMessage());
+            logger.log(Level.SEVERE, "Failed get of replay char sequence in " +
+                    Thread.currentThread().getName(), e);
         }
-        
+
         if (cs == null) {
             return;
         }
@@ -641,7 +681,7 @@ implements CoreAttributeConstants {
                     cs.close();
                 } catch (IOException ioe) {
                     logger.warning(TextUtils.exceptionToString(
-                        "Failed close of ReplayCharSequence.", ioe));
+                            "Failed close of ReplayCharSequence.", ioe));
                 }
             }
         }
@@ -650,16 +690,17 @@ implements CoreAttributeConstants {
     /**
      * Run extractor.
      * This method is package visible to ease testing.
+     *
      * @param curi CrawlURI we're processing.
-     * @param cs Sequence from underlying ReplayCharSequence. This
-     * is TRANSIENT data. Make a copy if you want the data to live outside
-     * of this extractors' lifetime.
+     * @param cs   Sequence from underlying ReplayCharSequence. This
+     *             is TRANSIENT data. Make a copy if you want the data to live outside
+     *             of this extractors' lifetime.
      */
     void extract(CrawlURI curi, CharSequence cs) {
         Matcher tags = TextUtils.getMatcher(RELEVANT_TAG_EXTRACTOR, cs);
 
-        while(tags.find()) {
-            if(Thread.interrupted()){
+        while (tags.find()) {
+            if (Thread.interrupted()) {
                 break;
             }
             if (tags.start(8) > 0) {
@@ -681,15 +722,15 @@ implements CoreAttributeConstants {
                 // generic <whatever> match
                 int start5 = tags.start(5);
                 int end5 = tags.end(5);
-                assert start5 >= 0: "Start is: " + start5 + ", " + curi;
-                assert end5 >= 0: "End is :" + end5 + ", " + curi;
+                assert start5 >= 0 : "Start is: " + start5 + ", " + curi;
+                assert end5 >= 0 : "End is :" + end5 + ", " + curi;
                 int start6 = tags.start(6);
                 int end6 = tags.end(6);
-                assert start6 >= 0: "Start is: " + start6 + ", " + curi;
-                assert end6 >= 0: "End is :" + end6 + ", " + curi;
+                assert start6 >= 0 : "Start is: " + start6 + ", " + curi;
+                assert end6 >= 0 : "End is :" + end6 + ", " + curi;
                 processGeneralTag(curi,
-                    cs.subSequence(start6, end6),
-                    cs.subSequence(start5, end5));
+                        cs.subSequence(start6, end6),
+                        cs.subSequence(start5, end5));
 
             } else if (tags.start(1) > 0) {
                 // <script> match
@@ -703,7 +744,7 @@ implements CoreAttributeConstants {
 //                processScript(curi, cs.subSequence(start, end),
 //                    tags.end(2) - start);
 
-            } else if (tags.start(3) > 0){
+            } else if (tags.start(3) > 0) {
                 // <style... match
 //                int start = tags.start(3);
 //                int end = tags.end(3);
@@ -719,9 +760,7 @@ implements CoreAttributeConstants {
     }
 
 
-    static final String NON_HTML_PATH_EXTENSION =
-        "(?i)(gif)|(jp(e)?g)|(png)|(tif(f)?)|(bmp)|(avi)|(mov)|(mp(e)?g)"+
-        "|(mp3)|(mp4)|(swf)|(wav)|(au)|(aiff)|(mid)";
+
 
     /**
      * Test whether this HTML is so unexpected (eg in place of a GIF URI)
@@ -733,7 +772,7 @@ implements CoreAttributeConstants {
      */
     protected boolean isHtmlExpectedHere(CrawlURI curi) throws URIException {
         String path = curi.getUURI().getPath();
-        if(path==null) {
+        if (path == null) {
             // no path extension, HTML is fine
             return true;
         }
@@ -742,33 +781,34 @@ implements CoreAttributeConstants {
             // no path extension, HTML is fine
             return true;
         }
-        if(dot<(path.length()-5)) {
+        if (dot < (path.length() - 5)) {
             // extension too long to recognize, HTML is fine
             return true;
         }
-        String ext = path.substring(dot+1);
-        return ! TextUtils.matches(NON_HTML_PATH_EXTENSION, ext);
+        String ext = path.substring(dot + 1);
+        return !TextUtils.matches(NON_HTML_PATH_EXTENSION, ext);
     }
 
     protected void processScript(CrawlURI curi, CharSequence sequence,
-            int endOfOpenTag) {
+                                 int endOfOpenTag) {
         // first, get attributes of script-open tag
         // as per any other tag
-        processGeneralTag(curi,sequence.subSequence(0,6),
-            sequence.subSequence(0,endOfOpenTag));
+        processGeneralTag(curi, sequence.subSequence(0, 6),
+                sequence.subSequence(0, endOfOpenTag));
 
         // then, apply best-effort string-analysis heuristics
         // against any code present (false positives are OK)
         processScriptCode(
-            curi, sequence.subSequence(endOfOpenTag, sequence.length()));
+                curi, sequence.subSequence(endOfOpenTag, sequence.length()));
     }
 
     /**
      * Process metadata tags.
+     *
      * @param curi CrawlURI we're processing.
-     * @param cs Sequence from underlying ReplayCharSequence. This
-     * is TRANSIENT data. Make a copy if you want the data to live outside
-     * of this extractors' lifetime.
+     * @param cs   Sequence from underlying ReplayCharSequence. This
+     *             is TRANSIENT data. Make a copy if you want the data to live outside
+     *             of this extractors' lifetime.
      * @return True robots exclusion metatag.
      */
     protected boolean processMeta(CrawlURI curi, CharSequence cs) {
@@ -778,9 +818,9 @@ implements CoreAttributeConstants {
         String content = null;
         while (attr.find()) {
             int valueGroup =
-                (attr.start(14) > -1) ? 14 : (attr.start(15) > -1) ? 15 : 16;
+                    (attr.start(14) > -1) ? 14 : (attr.start(15) > -1) ? 15 : 16;
             CharSequence value =
-                cs.subSequence(attr.start(valueGroup), attr.end(valueGroup));
+                    cs.subSequence(attr.start(valueGroup), attr.end(valueGroup));
             value = TextUtils.unescapeHtml(value);
             if (attr.group(1).equalsIgnoreCase("name")) {
                 name = value.toString();
@@ -794,35 +834,35 @@ implements CoreAttributeConstants {
         TextUtils.recycleMatcher(attr);
 
         // Look for the 'robots' meta-tag
-        if("robots".equalsIgnoreCase(name) && content != null ) {
+        if ("robots".equalsIgnoreCase(name) && content != null) {
             curi.putString(A_META_ROBOTS, content);
             RobotsHonoringPolicy policy =
-                getSettingsHandler().getOrder().getRobotsHonoringPolicy();
+                    getSettingsHandler().getOrder().getRobotsHonoringPolicy();
             String contentLower = content.toLowerCase();
             if ((policy == null
-                || (!policy.isType(curi, RobotsHonoringPolicy.IGNORE)
+                    || (!policy.isType(curi, RobotsHonoringPolicy.IGNORE)
                     && !policy.isType(curi, RobotsHonoringPolicy.CUSTOM)))
-                && (contentLower.indexOf("nofollow") >= 0
+                    && (contentLower.indexOf("nofollow") >= 0
                     || contentLower.indexOf("none") >= 0)) {
                 // if 'nofollow' or 'none' is specified and the
                 // honoring policy is not IGNORE or CUSTOM, end html extraction
                 logger.fine("HTML extraction skipped due to robots meta-tag for: "
-                                + curi.toString());
+                        + curi.toString());
                 return true;
             }
         } else if ("refresh".equalsIgnoreCase(httpEquiv) && content != null) {
             int urlIndex = content.indexOf("=") + 1;
-            if(urlIndex>0) {
+            if (urlIndex > 0) {
                 String refreshUri = content.substring(urlIndex);
                 try {
-                        curi.createAndAddLinkRelativeToBase(refreshUri, "meta",
-                                Link.REFER_HOP);
+                    curi.createAndAddLinkRelativeToBase(refreshUri, "meta",
+                            Link.REFER_HOP);
                 } catch (URIException e) {
                     if (getController() != null) {
                         getController().logUriError(e, curi.getUURI(), refreshUri);
                     } else {
                         logger.info("Failed createAndAddLinkRelativeToBase " +
-                            curi + ", " + cs + ", " + refreshUri + ": " + e);
+                                curi + ", " + cs + ", " + refreshUri + ": " + e);
                     }
                 }
             }
@@ -832,17 +872,18 @@ implements CoreAttributeConstants {
 
     /**
      * Process style text.
-     * @param curi CrawlURI we're processing.
-     * @param sequence Sequence from underlying ReplayCharSequence. This
-     * is TRANSIENT data. Make a copy if you want the data to live outside
-     * of this extractors' lifetime.
+     *
+     * @param curi         CrawlURI we're processing.
+     * @param sequence     Sequence from underlying ReplayCharSequence. This
+     *                     is TRANSIENT data. Make a copy if you want the data to live outside
+     *                     of this extractors' lifetime.
      * @param endOfOpenTag
      */
     protected void processStyle(CrawlURI curi, CharSequence sequence,
-            int endOfOpenTag) {
+                                int endOfOpenTag) {
         // First, get attributes of script-open tag as per any other tag.
-        processGeneralTag(curi, sequence.subSequence(0,6),
-            sequence.subSequence(0,endOfOpenTag));
+        processGeneralTag(curi, sequence.subSequence(0, 6),
+                sequence.subSequence(0, endOfOpenTag));
 
 //       if((Boolean)getUncheckedAttribute(curi, ATTR_EXTRACT_JAVASCRIPT)) {
 //            this.numberOfLinksExtracted += ExtractorCSS.processStyleCode(
@@ -852,7 +893,6 @@ implements CoreAttributeConstants {
         // then, parse for URIs
 
     }
-    
 
 
     /* (non-Javadoc)
@@ -864,43 +904,38 @@ implements CoreAttributeConstants {
         ret.append("  Function:          Link extraction on HTML documents\n");
         ret.append("  CrawlURIs handled: " + this.numberOfCURIsHandled + "\n");
         ret.append("  Links extracted:   " + this.numberOfLinksExtracted +
-            "\n\n");
+                "\n\n");
         return ret.toString();
     }
 
-    /** 检测pageUrl和extractUrl是否是同一个域名下的,是则返回true否则返回false
-     * @param pageUrl 当前页面的URL
+    /**
+     * 检测pageUrl和extractUrl是否是同一个域名下的,是则返回true否则返回false
+     *
+     * @param pageUrl    当前页面的URL
      * @param extractUrl 从页面中提取出来的URL
      */
-    private boolean checkHost(String pageUrl,String extractUrl)
-    {
+    private boolean checkHost(String pageUrl, String extractUrl) {
         try {
             //如果当前提取到的URL和这个页面的URL的一致，则不提取
             // 或者以#开头，则说明该URL是锚点，同样不提取
-            if (extractUrl == null || extractUrl.length() == 0 || extractUrl.startsWith("#"))
-            {
+            if (extractUrl == null || extractUrl.length() == 0 || extractUrl.startsWith("#")) {
                 return false;
             }
 
             URI extractUri = new URI(extractUrl);
             URI pageUri = new URI(pageUrl);
-            if(extractUri.getAuthority() != null)
-            {
-               return extractUri.getAuthority().equals(pageUri.getAuthority());
+            if (extractUri.getAuthority() != null) {
+                return extractUri.getAuthority().equals(pageUri.getAuthority());
             }
 
-            if(extractUri.getPath() == null)
-            {
+            if (extractUri.getPath() == null) {
                 return false;
-            }
-            else if(extractUri.getPath().length() != 0)
-            {
+            } else if (extractUri.getPath().length() != 0) {
                 //相对路径
                 return true;
             }
-
+        } catch (URIException e) {
         }
-        catch (URIException e) {}
 
         return false;
     }

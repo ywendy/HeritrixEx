@@ -15,6 +15,7 @@ public class DbService {
     private Connection connect;
     private static final String confName = "/conf/db.properties";
 
+
     /**
      * 在Data表中插入一行记录
      *
@@ -23,16 +24,15 @@ public class DbService {
     public void insertData(DataTable data) {
         List<Object> params = new ArrayList<Object>();
         params.add(data.getContent());
-        params.add(data.getHeader());
         params.add(data.getSeed());
         params.add(data.getUrl());
+        params.add(data.getLevel());
 
         updateDb(data.getInsertSql(), params);
     }
 
     /*
-   * 获取数据库的连接，单例模式
-   *
+   * 获取数据库的连接
     */
     private Connection getConnection() {
         try {
@@ -41,7 +41,8 @@ public class DbService {
                 try {
                     Class.forName("com.mysql.jdbc.Driver");
 
-                    String DB_URL = props.getProperty("ADDRESS") + ":" + props.getProperty("PORT") + "/" + props.getProperty("DBNAME");
+                    String DB_URL = props.getProperty("ADDRESS") + ":" + props.getProperty("PORT") + "/" + props.getProperty("DBNAME")
+                            + "?useUnicode=true&characterEncoding=UTF-8";
 
                     connect = DriverManager.getConnection(
                             DB_URL,
@@ -80,7 +81,6 @@ public class DbService {
 
         try {
             pstmt = conn.prepareStatement(sql);
-            System.out.println(params.size());
             for (int i = 1; i <= params.size(); i++) {
                 pstmt.setObject(i, params.get(i - 1));
             }
@@ -99,19 +99,12 @@ public class DbService {
         return effectRows;
     }
 
-    /**
-     * TODO
-     */
-    private boolean queryDb(String sql) {
-        return true;
-    }
-
     public static void main(String[] args) {
         DataTable db = new DataTable();
         db.setContent("123");
         db.setSeed("hello");
         db.setUrl("www.baidu.com");
-        db.setHeader("a");
+
         DbService ds = new DbService();
         ds.insertData(db);
         ds.insertData(db);

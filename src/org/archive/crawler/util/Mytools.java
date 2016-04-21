@@ -1,8 +1,12 @@
 package org.archive.crawler.util;
 
+import org.archive.crawler.db.DbService;
+
 import java.io.*;
 import java.util.Properties;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by cyh on 16-3-23.
@@ -10,17 +14,27 @@ import java.util.logging.Logger;
 public class Mytools {
     private static Logger logger =
             Logger.getLogger(Mytools.class.getName());
+    private static DbService ds;
+
     /**
-     * 向名为filename的文件中追加content,并和之前的内容以换行隔开
+     * 向名为filename的文件中追加内容content，并和之前的内容以换行隔开
+     */
+    public static void writeFile(String filename, String content) {
+        writeFile(filename, "\n\t" + content, true);
+    }
+
+    /**
+     * 向名为filename的文件中写入content
      * @param  filename 文件名
      * @param  content 追加的内容
+     * @param  mode 如果是true的话即追加内容，false为清空后再写入
       */
-    public static void writeFile(String filename,String content)
+    public static void writeFile(String filename, String content, boolean mode)
     {
         try
         {
-            FileWriter writer=new FileWriter(filename,true);
-            writer.write("\n\t"+content);
+            FileWriter writer = new FileWriter(filename, mode);
+            writer.write(content);
             writer.close();
         } catch (IOException e)
         {
@@ -43,6 +57,47 @@ public class Mytools {
             logger.info("配置文件出错");
         }
         return props;
+    }
+
+    /**
+     * 单例模式
+     */
+    public static DbService getDbConnect() {
+        if (ds == null) {
+            ds = new DbService();
+        }
+        return ds;
+    }
+
+
+    private final static Pattern pattern = Pattern.compile("\\S*[?]\\S*");
+
+    /**
+     * 获取链接的后缀名
+     *
+     * @return
+     */
+    public static String parseSuffix(String url) {
+        //如果不包含. 说明没有后缀
+        if (!url.contains("."))
+            return "";
+
+        Matcher matcher = pattern.matcher(url);
+
+        String[] spUrl = url.toString().split("/");
+        int len = spUrl.length;
+        String endUrl = spUrl[len - 1];
+
+        if (matcher.find()) {
+            String[] spEndUrl = endUrl.split("\\?");
+            return spEndUrl[0].split("\\.")[1];
+        }
+
+        return endUrl.split("\\.")[1];
+    }
+
+    public static void main(String[] args) {
+        System.out.println("args = [" + parseSuffix("/") + "]");
     }
 
 }

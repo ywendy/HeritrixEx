@@ -8,14 +8,15 @@ public class DataTable {
     private String url;
     private String content;
     private String seed;
-    private String header;
+    private int level;
 
-    public String getHeader() {
-        return header;
+
+    public int getLevel() {
+        return level;
     }
 
-    public void setHeader(String header) {
-        this.header = header;
+    public void setLevel(int level) {
+        this.level = level;
     }
 
     public int getId() {
@@ -51,6 +52,6 @@ public class DataTable {
     }
 
     public String getInsertSql() {
-        return "insert into data (content,header,seed,url) values (?,?,?,?)";
+        return "insert into data (content,seed,url,level) values (?,?,?,?)";
     }
 }

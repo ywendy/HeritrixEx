@@ -3,7 +3,7 @@ package org.archive.crawler.writer;
 import org.apache.commons.httpclient.URIException;
 import org.archive.crawler.datamodel.CrawlURI;
 import org.archive.crawler.db.DataTable;
-import org.archive.crawler.db.DbService;
+import org.archive.crawler.util.Mytools;
 import org.archive.io.RecordingInputStream;
 import org.archive.io.ReplayInputStream;
 import org.archive.net.UURI;
@@ -15,7 +15,6 @@ import java.io.IOException;
  * Created by cyh on 2016/4/16.
  */
 public class MyWriterProcessor extends MirrorWriterProcessor {
-
 
     /**
      * @param name
@@ -32,10 +31,12 @@ public class MyWriterProcessor extends MirrorWriterProcessor {
 
         // Only http and https schemes are supported.
         String scheme = uuri.getScheme();
-        if (!"http".equalsIgnoreCase(scheme)
-                && !"https".equalsIgnoreCase(scheme)) {
+        if ((!"http".equalsIgnoreCase(scheme)
+                && !"https".equalsIgnoreCase(scheme))
+                || isRobots(curi)) {
             return;
         }
+
 
         RecordingInputStream recis = curi.getHttpRecorder().getRecordedInput();
         if (0L == recis.getResponseContentLength()) {
@@ -49,22 +50,21 @@ public class MyWriterProcessor extends MirrorWriterProcessor {
             ReplayInputStream replayis = recis.getContentReplayInputStream();
             ByteArrayOutputStream sos = new ByteArrayOutputStream();
             replayis.readFullyTo(sos);
-
             data.setContent(sos.toString());
         } catch (IOException e) {
             e.printStackTrace();
         }
 
         data.setUrl(curi.toString());
+        data.setLevel(curi.getPathFromSeed() == null ? 0 : curi.getPathFromSeed().length());
+//        Mytools.writeFile("debug.txt",curi.getPathFromSeed() == null?"":curi.getPathFromSeed());
+//        Mytools.writeFile("debug.txt",data.getContent());
         try {
             data.setSeed(uuri.getAuthority());
         } catch (URIException e) {
             e.printStackTrace();
         }
-
         // 插入数据库中
-        DbService db = new DbService();
-        db.insertData(data);
+        Mytools.getDbConnect().insertData(data);
     }
-
 }

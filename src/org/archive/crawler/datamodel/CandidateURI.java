@@ -23,24 +23,19 @@
  */
 package org.archive.crawler.datamodel;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.PrintWriter;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
 import org.apache.commons.httpclient.URIException;
 import org.archive.crawler.extractor.Link;
 import org.archive.net.UURI;
 import org.archive.net.UURIFactory;
 import org.archive.util.ArchiveUtils;
 import org.archive.util.Reporter;
-
 import st.ata.util.AList;
 import st.ata.util.HashtableAList;
+
+import java.io.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * A URI, discovered or passed-in, that may be scheduled.
@@ -103,6 +98,17 @@ implements Serializable, Reporter, CoreAttributeConstants {
      * X speculative embed (as from javascript, some alternate-format extractors
      * L link</pre>
      * For example LLLE (an embedded image on a page 3 links from seed).
+     * /**
+     * 该值代表当前CandidateURI是如何从种子那里生成的,有如下生成方式：
+     * P:预先处理URL,一般是DNS,如DNS:www.baidu.com
+     * R:重定向URL
+     * E:嵌入式URL，如Frame、src等
+     * X:特殊嵌入式URL,如JS中的URL
+     * L:一般意义上的URL，如<a href="www.baidu.com">
+     * 该属性除了可以记录从种子那来源方式的话同时还可以记录深度,因为
+     * 该值是一层一层传递，每传递一层则增加一个以上字符.如此通过长度
+     * 可以判断当前URL属于种子的第几层从而做到控制抓取深度, 如果当
+     * 前CandidateURI是种子,则该值为null
      */
     private String pathFromSeed;
     
