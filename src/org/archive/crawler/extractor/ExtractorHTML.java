@@ -31,7 +31,7 @@ import org.archive.crawler.datamodel.FetchStatusCodes;
 import org.archive.crawler.datamodel.RobotsHonoringPolicy;
 import org.archive.crawler.settings.SimpleType;
 import org.archive.crawler.settings.Type;
-import org.archive.crawler.util.Mytools;
+import org.archive.crawler.util.Toolkit;
 import org.archive.io.ReplayCharSequence;
 import org.archive.net.UURI;
 import org.archive.net.UURIFactory;
@@ -46,7 +46,6 @@ import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Basic link-extraction, from an HTML content-body,
@@ -280,7 +279,7 @@ public class ExtractorHTML extends Extractor
 
 //                if(!checkHost(curi.toString(),value.toString()))
 //                {
-//                    Mytools.writeFile("debug.txt","[REJECT] "+value.toString());
+//                    Toolkit.writeFile("debug.txt","[REJECT] "+value.toString());
 //                    continue;
 //                }
 
@@ -528,10 +527,10 @@ public class ExtractorHTML extends Extractor
                 logger.finest("link: " + value.toString() + " from " + curi);
             }
             if (!checkHost(curi.toString(), value.toString())) {
-//                Mytools.writeFile("debug.txt","[REJECT] "+value.toString());
+//                Toolkit.writeFile("debug.txt","[REJECT] "+value.toString());
                 return;
             }
-//            Mytools.writeFile("debug.txt","[2PASS] "+value.toString());
+//            Toolkit.writeFile("debug.txt","[2PASS] "+value.toString());
             addLinkFromString(curi, value, context, Link.NAVLINK_HOP);
             this.numberOfLinksExtracted++;
         }
@@ -558,7 +557,7 @@ public class ExtractorHTML extends Extractor
             // no path extension, HTML is fine
             return false;
         }
-        String ext = Mytools.parseSuffix(path);
+        String ext = Toolkit.parseSuffix(path);
         return TextUtils.matches(rejectsuffix, ext);
     }
 
@@ -600,10 +599,10 @@ public class ExtractorHTML extends Extractor
                     " from " + curi);
         }
         if (!checkHost(curi.toString(), value.toString())) {
-//            Mytools.writeFile("debug.txt","[REJECT] "+value.toString());
+//            Toolkit.writeFile("debug.txt","[REJECT] "+value.toString());
             return;
         }
-//        Mytools.writeFile("debug.txt","[1PASS] "+ value);
+//        Toolkit.writeFile("debug.txt","[1PASS] "+ value);
         addLinkFromString(curi,
                 (value instanceof String) ?
                         (String) value : value.toString(),

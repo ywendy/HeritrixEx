@@ -1,10 +1,5 @@
 package org.archive.crawler.util;
 
-import org.apache.commons.httpclient.URIException;
-import org.archive.crawler.db.DbService;
-import org.archive.net.UURI;
-import org.archive.net.UURIFactory;
-
 import java.io.*;
 import java.util.Properties;
 import java.util.logging.Logger;
@@ -14,10 +9,9 @@ import java.util.regex.Pattern;
 /**
  * Created by cyh on 16-3-23.
  */
-public class Mytools {
+public class Toolkit {
     private static Logger logger =
-            Logger.getLogger(Mytools.class.getName());
-    private static DbService ds;
+            Logger.getLogger(Toolkit.class.getName());
 
     /**
      * 向名为filename的文件中追加内容content，并和之前的内容以换行隔开
@@ -62,15 +56,6 @@ public class Mytools {
         return props;
     }
 
-    /**
-     * 单例模式
-     */
-    public static DbService getDbConnect() {
-        if (ds == null) {
-            ds = new DbService();
-        }
-        return ds;
-    }
 
 
     private final static Pattern pattern = Pattern.compile("\\S*[?]\\S*");

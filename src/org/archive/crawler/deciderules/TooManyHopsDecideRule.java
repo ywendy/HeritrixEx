@@ -73,7 +73,7 @@ public class TooManyHopsDecideRule extends PredicatedDecideRule {
      */
     protected boolean evaluate(Object object) {
         try {
-//            Mytools.writeFile("debug.txt","#evaluate max_hops#");
+//            Toolkit.writeFile("debug.txt","#evaluate max_hops#");
             CandidateURI curi = (CandidateURI)object;
             return curi.getPathFromSeed() != null &&
                 curi.getPathFromSeed().length() > getThresholdHops(object);

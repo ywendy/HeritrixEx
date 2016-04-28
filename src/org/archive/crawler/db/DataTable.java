@@ -1,16 +1,40 @@
 package org.archive.crawler.db;
 
+import com.j256.ormlite.field.DatabaseField;
+import com.j256.ormlite.table.DatabaseTable;
+
+import java.sql.Date;
+
 /**
  * Created by cyh on 2016/4/18.
  */
-public class DataTable extends Table {
+@DatabaseTable(tableName = "data")
+public class DataTable {
+    @DatabaseField(id = true)
     private int id;
+    @DatabaseField
     private String url;
+    @DatabaseField
     private String content;
+    @DatabaseField
     private String seed;
+    @DatabaseField
     private int level;
 
+    @DatabaseField
+    private Date time;
 
+    public DataTable() {
+
+    }
+
+    public Date getTime() {
+        return time;
+    }
+
+    public void setTime(Date time) {
+        this.time = time;
+    }
     public int getLevel() {
         return level;
     }
@@ -51,8 +75,4 @@ public class DataTable extends Table {
         this.seed = seed;
     }
 
-    @Override
-    public String getInsertSql() {
-        return "insert into data (content,seed,url,level) values (?,?,?,?)";
-    }
 }

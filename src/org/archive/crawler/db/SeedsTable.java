@@ -1,12 +1,24 @@
 package org.archive.crawler.db;
 
+import com.j256.ormlite.field.DatabaseField;
+import com.j256.ormlite.table.DatabaseTable;
+
 /**
  * Created by ccoder on 2016/4/27.
  */
-public class SeedsTable extends Table {
+@DatabaseTable(tableName = "seeds")
+public class SeedsTable {
+
+    @DatabaseField(id = true)
     private int id;
+    @DatabaseField
     private String url;
-    private int enable;
+    @DatabaseField
+    private int enable; //0是开启，1是禁止
+
+    public SeedsTable() {
+
+    }
 
     public int getId() {
         return id;
@@ -30,10 +42,5 @@ public class SeedsTable extends Table {
 
     public void setEnable(int enable) {
         this.enable = enable;
-    }
-
-    @Override
-    public String getInsertSql() {
-        return null;
     }
 }

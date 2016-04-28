@@ -1,15 +1,12 @@
 package org.archive.crawler.writer;
 
-import org.apache.commons.httpclient.URIException;
 import org.archive.crawler.datamodel.CrawlURI;
+import org.archive.crawler.db.DataService;
 import org.archive.crawler.db.DataTable;
-import org.archive.crawler.util.Mytools;
-import org.archive.io.RecordingInputStream;
-import org.archive.io.ReplayInputStream;
+import org.archive.crawler.util.Toolkit;
 import org.archive.net.UURI;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import java.sql.Date;
 
 /**
  * Created by cyh on 2016/4/16.
@@ -44,8 +41,9 @@ public class MyWriterProcessor extends MirrorWriterProcessor {
         data.setSeed(curi.getSeedSource());
         data.setUrl(curi.toString());
         data.setLevel(curi.getLevel());
-
+        data.setTime(new Date(System.currentTimeMillis()));
         // 插入数据库中
-        Mytools.getDbConnect().insertData(data);
+//        Toolkit.getDbConnect().insertData(data);
+        DataService.addOne(data);
     }
 }

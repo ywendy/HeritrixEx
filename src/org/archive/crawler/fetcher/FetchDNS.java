@@ -41,7 +41,6 @@ import org.archive.crawler.datamodel.CrawlURI;
 import org.archive.crawler.datamodel.FetchStatusCodes;
 import org.archive.crawler.framework.Processor;
 import org.archive.crawler.settings.SimpleType;
-import org.archive.crawler.util.Mytools;
 import org.archive.util.ArchiveUtils;
 import org.archive.util.HttpRecorder;
 import org.archive.util.InetAddressUtil;

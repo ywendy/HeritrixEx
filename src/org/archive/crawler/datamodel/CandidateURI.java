@@ -25,7 +25,6 @@ package org.archive.crawler.datamodel;
 
 import org.apache.commons.httpclient.URIException;
 import org.archive.crawler.extractor.Link;
-import org.archive.crawler.util.Mytools;
 import org.archive.net.UURI;
 import org.archive.net.UURIFactory;
 import org.archive.util.ArchiveUtils;

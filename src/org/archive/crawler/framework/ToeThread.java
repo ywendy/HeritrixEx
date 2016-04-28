@@ -26,7 +26,6 @@ package org.archive.crawler.framework;
 import com.sleepycat.util.RuntimeExceptionWrapper;
 import org.archive.crawler.datamodel.*;
 import org.archive.crawler.framework.exceptions.EndedException;
-import org.archive.crawler.util.Mytools;
 import org.archive.util.*;
 
 import java.io.PrintWriter;
@@ -136,12 +135,12 @@ Reporter, ProgressStatisticsReporter {
 
                 //从Frontier取出下一个要处理的URL
                 CrawlURI curi = controller.getFrontier().next();
-//                Mytools.writeFile("debug.txt",curi.toString()+"##"+curi.getSeedSource());
+//                Toolkit.writeFile("debug.txt",curi.toString()+"##"+curi.getSeedSource());
                 synchronized(this) {
                     continueCheck();
                     setCurrentCuri(curi);
                 }
-//                Mytools.writeFile("debug.txt",curi.toString());
+//                Toolkit.writeFile("debug.txt",curi.toString());
                 processCrawlUri();
                 setStep(STEP_ABOUT_TO_RETURN_URI);
                 continueCheck();
@@ -294,7 +293,7 @@ Reporter, ProgressStatisticsReporter {
                     setStep(STEP_ABOUT_TO_BEGIN_PROCESSOR);
                     Processor currentProcessor = getProcessor(currentCuri.nextProcessor());
                     currentProcessorName = currentProcessor.getName();
-//                    Mytools.writeFile("debug.txt",currentProcessorName);
+//                    Toolkit.writeFile("debug.txt",currentProcessorName);
                     continueCheck();
 //                    long memBefore = (Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory())/1024;
                     currentProcessor.process(currentCuri);

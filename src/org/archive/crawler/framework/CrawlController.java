@@ -74,7 +74,6 @@ import org.archive.crawler.io.UriProcessingFormatter;
 import org.archive.crawler.settings.MapType;
 import org.archive.crawler.settings.SettingsHandler;
 import org.archive.crawler.util.CheckpointUtils;
-import org.archive.crawler.util.Mytools;
 import org.archive.io.GenerationFileHandler;
 import org.archive.net.UURI;
 import org.archive.net.UURIFactory;
