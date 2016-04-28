@@ -27,7 +27,7 @@ public class MyWriterProcessor extends MirrorWriterProcessor {
         if (!curi.isSuccess()) {
             return;
         }
-        UURI uuri = curi.getUURI(); // Current URI.
+        UURI uuri = curi.getUURI(); // Current URI
 
         // Only http and https schemes are supported.
         String scheme = uuri.getScheme();
@@ -38,32 +38,13 @@ public class MyWriterProcessor extends MirrorWriterProcessor {
         }
 
 
-        RecordingInputStream recis = curi.getHttpRecorder().getRecordedInput();
-        if (0L == recis.getResponseContentLength()) {
-            return;
-        }
-
         //构建DataTable对象
         DataTable data = new DataTable();
-        try {
-            //提取网页内容
-            ReplayInputStream replayis = recis.getContentReplayInputStream();
-            ByteArrayOutputStream sos = new ByteArrayOutputStream();
-            replayis.readFullyTo(sos);
-            data.setContent(sos.toString());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
+        data.setContent(curi.getPageContent());
+        data.setSeed(curi.getSeedSource());
         data.setUrl(curi.toString());
-        data.setLevel(curi.getPathFromSeed() == null ? 0 : curi.getPathFromSeed().length());
-//        Mytools.writeFile("debug.txt",curi.getPathFromSeed() == null?"":curi.getPathFromSeed());
-//        Mytools.writeFile("debug.txt",data.getContent());
-        try {
-            data.setSeed(uuri.getAuthority());
-        } catch (URIException e) {
-            e.printStackTrace();
-        }
+        data.setLevel(curi.getLevel());
+
         // 插入数据库中
         Mytools.getDbConnect().insertData(data);
     }

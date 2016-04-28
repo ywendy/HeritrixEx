@@ -23,6 +23,7 @@
  */
 package org.archive.crawler.datamodel;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -38,10 +39,13 @@ import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.URIException;
 import org.archive.crawler.datamodel.credential.CredentialAvatar;
 import org.archive.crawler.datamodel.credential.Rfc2617Credential;
+import org.archive.crawler.db.DataTable;
 import org.archive.crawler.extractor.Link;
 import org.archive.crawler.framework.Processor;
 import org.archive.crawler.framework.ProcessorChain;
 import org.archive.crawler.util.Transform;
+import org.archive.io.RecordingInputStream;
+import org.archive.io.ReplayInputStream;
 import org.archive.net.UURI;
 import org.archive.net.UURIFactory;
 import org.archive.util.Base32;
@@ -196,10 +200,13 @@ implements FetchStatusCodes {
     public CrawlURI(CandidateURI caUri, long o) {
         super(caUri.getUURI(), caUri.getPathFromSeed(), caUri.getVia(),
             caUri.getViaContext());
+
         ordinal = o;
+        setSeedSource(caUri.getSeedSource()); //重置时把站源属性也带过去
         setIsSeed(caUri.isSeed());
         setSchedulingDirective(caUri.getSchedulingDirective());
         setAList(caUri.getAList());
+
     }
 
     /**
@@ -496,6 +503,7 @@ implements FetchStatusCodes {
         }
         return this.cachedCrawlURIString;
     }
+
 
     /**
      * Get the content type of this URI.
@@ -1413,5 +1421,37 @@ implements FetchStatusCodes {
         return completedTime - beganTime;
     }
 
+    /**
+     * 获取网页内容
+     *
+     * @return
+     */
+    public String getPageContent() {
+        RecordingInputStream recis = getHttpRecorder().getRecordedInput();
+        if (0L == recis.getResponseContentLength()) {
+            return "";
+        }
+
+        ByteArrayOutputStream sos = null;
+
+        try {
+            //提取网页内容
+            ReplayInputStream replayis = recis.getContentReplayInputStream();
+            sos = new ByteArrayOutputStream();
+            replayis.readFullyTo(sos);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return sos.toString();
+    }
+
+    /**
+     * 获取当前是属于爬虫的第几层
+     *
+     * @return
+     */
+    public int getLevel() {
+        return getPathFromSeed() == null ? 0 : getPathFromSeed().length();
+    }
 
 }

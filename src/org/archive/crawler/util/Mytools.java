@@ -1,6 +1,9 @@
 package org.archive.crawler.util;
 
+import org.apache.commons.httpclient.URIException;
 import org.archive.crawler.db.DbService;
+import org.archive.net.UURI;
+import org.archive.net.UURIFactory;
 
 import java.io.*;
 import java.util.Properties;
@@ -78,26 +81,33 @@ public class Mytools {
      * @return
      */
     public static String parseSuffix(String url) {
-        //如果不包含. 说明没有后缀
-        if (!url.contains("."))
-            return "";
 
-        Matcher matcher = pattern.matcher(url);
+        if (url.endsWith("/"))
+            return "";
 
         String[] spUrl = url.toString().split("/");
         int len = spUrl.length;
+        if (len == 0) {
+            return "";
+        }
         String endUrl = spUrl[len - 1];
+        if (!endUrl.contains("."))
+            return "";
 
+        String[] exts = null;
+        Matcher matcher = pattern.matcher(url);
         if (matcher.find()) {
             String[] spEndUrl = endUrl.split("\\?");
-            return spEndUrl[0].split("\\.")[1];
+            exts = spEndUrl[0].split("\\.");
+        } else {
+            exts = endUrl.split("\\.");
         }
 
-        return endUrl.split("\\.")[1];
+        return exts[exts.length - 1];
     }
 
     public static void main(String[] args) {
-        System.out.println("args = [" + parseSuffix("/") + "]");
+        System.out.println(parseSuffix("q.cnblog.com/"));
     }
 
 }

@@ -513,18 +513,19 @@ implements CoreAttributeConstants {
     }
 
     public static void main(String[] args) throws Exception {
-        if (args.length != 1 && args.length != 2) {
-            System.err.println("Usage: " + ExtractorHTMLTest.class.getName() +
-                " URL|PATH [ENCODING]");
-            System.exit(1);
-        }
-        ExtractorHTMLTest testCase = new ExtractorHTMLTest();
-        testCase.setUp();
-        try {
-            testCase.runExtractor(testCase.getUURI(args[0]),
-                (args.length == 2)? args[1]: null);
-        } finally {
-            testCase.tearDown();
-        }
+//        if (args.length != 1 && args.length != 2) {
+//            System.err.println("Usage: " + ExtractorHTMLTest.class.getName() +
+//                " URL|PATH [ENCODING]");
+//            System.exit(1);
+//        }
+//        ExtractorHTMLTest testCase = new ExtractorHTMLTest();
+//        testCase.setUp();
+//        try {
+//            testCase.runExtractor(testCase.getUURI(args[0]),
+//                (args.length == 2)? args[1]: null);
+//        } finally {
+//            testCase.tearDown();
+//        }
+        System.out.println(ExtractorHTML.isRejectSuffix("test"));
     }
 }

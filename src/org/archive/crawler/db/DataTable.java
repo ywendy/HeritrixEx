@@ -3,7 +3,7 @@ package org.archive.crawler.db;
 /**
  * Created by cyh on 2016/4/18.
  */
-public class DataTable {
+public class DataTable extends Table {
     private int id;
     private String url;
     private String content;
@@ -51,6 +51,7 @@ public class DataTable {
         this.seed = seed;
     }
 
+    @Override
     public String getInsertSql() {
         return "insert into data (content,seed,url,level) values (?,?,?,?)";
     }

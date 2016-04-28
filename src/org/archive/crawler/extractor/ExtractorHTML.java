@@ -31,6 +31,7 @@ import org.archive.crawler.datamodel.FetchStatusCodes;
 import org.archive.crawler.datamodel.RobotsHonoringPolicy;
 import org.archive.crawler.settings.SimpleType;
 import org.archive.crawler.settings.Type;
+import org.archive.crawler.util.Mytools;
 import org.archive.io.ReplayCharSequence;
 import org.archive.net.UURI;
 import org.archive.net.UURIFactory;
@@ -45,6 +46,7 @@ import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Basic link-extraction, from an HTML content-body,
@@ -551,24 +553,15 @@ public class ExtractorHTML extends Extractor
      * @param path
      * @return
      */
-    private boolean isRejectSuffix(String path) {
+    public static boolean isRejectSuffix(String path) {
         if (path == null) {
             // no path extension, HTML is fine
             return false;
         }
-
-        int dot = path.lastIndexOf('.');
-        if (dot < 0) {
-            // no path extension, HTML is fine
-            return false;
-        }
-        if (dot < (path.length() - 5)) {
-            // extension too long to recognize, HTML is fine
-            return false;
-        }
-        String ext = path.substring(dot + 1);
+        String ext = Mytools.parseSuffix(path);
         return TextUtils.matches(rejectsuffix, ext);
     }
+
 
     protected void addLinkFromString(CrawlURI curi, CharSequence uri,
                                      CharSequence context, char hopType) {

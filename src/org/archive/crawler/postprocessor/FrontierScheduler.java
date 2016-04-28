@@ -33,6 +33,7 @@ import org.archive.crawler.datamodel.CandidateURI;
 import org.archive.crawler.datamodel.CrawlURI;
 import org.archive.crawler.datamodel.FetchStatusCodes;
 import org.archive.crawler.framework.Processor;
+import org.archive.crawler.util.Mytools;
 
 /**
  * 'Schedule' with the Frontier CandidateURIs being carried by the passed
@@ -75,6 +76,8 @@ implements FetchStatusCodes {
 
         synchronized(this) {
             for (CandidateURI cauri: curi.getOutCandidates()) {
+                String source = curi.getSeedSource();
+                cauri.setSeedSource(source);
                 schedule(cauri);
             }
         }
@@ -85,7 +88,7 @@ implements FetchStatusCodes {
     }
 
     /**
-     * Schedule the given {@link CandidateURI CandidateURI} with the Frontier.
+     * Schedule the given {@li nk CandidateURI CandidateURI} with the Frontier.
      * @param caUri The CandidateURI to be scheduled.
      */
     protected void schedule(CandidateURI caUri) {

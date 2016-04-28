@@ -25,6 +25,7 @@ package org.archive.crawler.datamodel;
 
 import org.apache.commons.httpclient.URIException;
 import org.archive.crawler.extractor.Link;
+import org.archive.crawler.util.Mytools;
 import org.archive.net.UURI;
 import org.archive.net.UURIFactory;
 import org.archive.util.ArchiveUtils;
@@ -42,55 +43,63 @@ import java.util.List;
  * When scheduled, a CandidateURI becomes a {@link CrawlURI}
  * made with the data contained herein. A CandidateURI
  * contains just the fields necessary to perform quick in-scope analysis.
- * 
+ * <p>
  * <p>Has a flexible attribute list that will be promoted into
  * any {@link CrawlURI} created from this CandidateURI.  Use it
  * to add custom data or state needed later doing custom processing.
  * See accessors/setters {@link #putString(String, String)},
- * {@link #getString(String)}, etc. 
- *
+ * {@link #getString(String)}, etc.
+ * <p>
  * Heritrix的核心类,代表着一个URL,贯穿整个抓取,与CrawlURI的区别是它还没有通过调度器(Frontier)，
  * 只有通过了调度器的URL才可能去获取网页内容区下载等
+ *
  * @author Gordon Mohr
  */
 public class CandidateURI
-implements Serializable, Reporter, CoreAttributeConstants {
+        implements Serializable, Reporter, CoreAttributeConstants {
     private static final long serialVersionUID = -7152937921526560388L;
 
-    /** Highest scheduling priority.
+    /**
+     * Highest scheduling priority.
      * Before any others of its class.
      */
     public static final int HIGHEST = 0;
-    
-    /** High scheduling priority.
+
+    /**
+     * High scheduling priority.
      * After any {@link #HIGHEST}.
      */
     public static final int HIGH = 1;
-    
-    /** Medium priority.
+
+    /**
+     * Medium priority.
      * After any {@link #HIGH}.
      */
     public static final int MEDIUM = 2;
-    
-    /** Normal/low priority.
+
+    /**
+     * Normal/low priority.
      * Whenever/end of queue.
      */
     public static final int NORMAL = 3;
-    
+
     private int schedulingDirective = NORMAL;
-    
-    /** 
+
+    /**
      * Usuable URI under consideration. Transient to allow
-     * more efficient custom serialization 
+     * more efficient custom serialization
      */
     private transient UURI uuri;
-    
-    /** Seed status */
+
+    /**
+     * Seed status
+     */
     private boolean isSeed = false;
 
     private boolean forceRevisit = false; // even if already visited
-    
-    /** String of letters indicating how this URI was reached from a seed.
+
+    /**
+     * String of letters indicating how this URI was reached from a seed.
      * <pre>
      * P precondition
      * R redirection
@@ -111,7 +120,7 @@ implements Serializable, Reporter, CoreAttributeConstants {
      * 前CandidateURI是种子,则该值为null
      */
     private String pathFromSeed;
-    
+
     /**
      * Where this URI was (presently) discovered. . Transient to allow
      * more efficient custom serialization
@@ -122,7 +131,7 @@ implements Serializable, Reporter, CoreAttributeConstants {
      * Context of URI's discovery, as per the 'context' in Link
      */
     private CharSequence viaContext;
-    
+
     /**
      * Flexible dynamic attributes list.
      * <p>
@@ -132,19 +141,19 @@ implements Serializable, Reporter, CoreAttributeConstants {
      * {@link CoreAttributeConstants} interface.  Use this list to carry
      * data or state produced by custom processors rather change the
      * classes {@link CrawlURI} or this class, CandidateURI.
-     *
+     * <p>
      * Transient to allow more efficient custom serialization.
      */
     private transient AList alist;
-    
+
     /**
      * Cache of this candidate uuri as a string.
-     *
+     * <p>
      * Profiling shows us spending about 1-2% of total elapsed time in
      * toString.
      */
     private String cachedCandidateURIString = null;
-    
+
 
     /**
      * Frontier/Scheduler lifecycle info.
@@ -155,29 +164,35 @@ implements Serializable, Reporter, CoreAttributeConstants {
      */
     private String classKey;
 
+
+    /**
+     * 来源于哪个种子站点
+     */
+    private String seedSource;
+
     /**
      * Constructor.
      * Protected access to block access to default constructor.
      */
-    protected CandidateURI () {
+    protected CandidateURI() {
         super();
     }
-    
+
     /**
      * @param u uuri instance this CandidateURI wraps.
      */
     public CandidateURI(UURI u) {
         this.uuri = u;
     }
-    
+
     /**
-     * @param u uuri instance this CandidateURI wraps.
+     * @param u            uuri instance this CandidateURI wraps.
      * @param pathFromSeed
      * @param via
      * @param viaContext
      */
     public CandidateURI(UURI u, String pathFromSeed, UURI via,
-            CharSequence viaContext) {
+                        CharSequence viaContext) {
         this.uuri = u;
         this.pathFromSeed = pathFromSeed;
         this.via = via;
@@ -186,12 +201,13 @@ implements Serializable, Reporter, CoreAttributeConstants {
 
     /**
      * Set the <tt>isSeed</tt> attribute of this URI.
+     *
      * @param b Is this URI a seed, true or false.
      */
     public void setIsSeed(boolean b) {
         this.isSeed = b;
         if (this.isSeed) {
-            if(pathFromSeed==null) {
+            if (pathFromSeed == null) {
                 this.pathFromSeed = "";
             }
 //          seeds created on redirect must have a via to be recognized; don't clear
@@ -233,16 +249,17 @@ implements Serializable, Reporter, CoreAttributeConstants {
     public CharSequence getViaContext() {
         return this.viaContext;
     }
-    
+
     /**
      * @param string
      */
     protected void setPathFromSeed(String string) {
         pathFromSeed = string;
     }
-    
+
     /**
      * Called when making a copy of another CandidateURI.
+     *
      * @param alist AList to use.
      */
     protected void setAList(AList alist) {
@@ -260,21 +277,22 @@ implements Serializable, Reporter, CoreAttributeConstants {
     public synchronized String getCandidateURIString() {
         if (this.cachedCandidateURIString == null) {
             this.cachedCandidateURIString =
-                "CandidateURI(" + toString() + ")";
+                    "CandidateURI(" + toString() + ")";
         }
         return this.cachedCandidateURIString;
     }
 
     /**
      * Method returns string version of this URI's referral URI.
+     *
      * @return String version of referral URI
      */
     public String flattenVia() {
-        return (via == null)? "": via.toString();
+        return (via == null) ? "" : via.toString();
     }
-    
+
     /**
-     * @return The UURI this CandidateURI wraps as a string 
+     * @return The UURI this CandidateURI wraps as a string
      * (We used return what {@link #getCandidateURIString()}
      * returns on a toString -- use that method if you still need
      * this functionality).
@@ -297,7 +315,6 @@ implements Serializable, Reporter, CoreAttributeConstants {
      * CandidateURI
      *
      * @param other The other CandidateURI
-     *
      * @return True if both are in the same domain, false otherwise.
      * @throws URIException
      */
@@ -306,11 +323,11 @@ implements Serializable, Reporter, CoreAttributeConstants {
         if (domain == null) {
             return false;
         }
-        while(domain.lastIndexOf('.') > domain.indexOf('.')) {
+        while (domain.lastIndexOf('.') > domain.indexOf('.')) {
             // While has more than one dot, lop off first segment
             domain = domain.substring(domain.indexOf('.') + 1);
         }
-        if(other.getUURI().getHost() == null) {
+        if (other.getUURI().getHost() == null) {
             return false;
         }
         return other.getUURI().getHost().endsWith(domain);
@@ -321,7 +338,7 @@ implements Serializable, Reporter, CoreAttributeConstants {
      * it already has been crawled. This also implies
      * that this URI will be scheduled for crawl before any other waiting
      * URIs for the same host.
-     *
+     * <p>
      * This value is used to refetch any expired robots.txt or dns-lookups.
      *
      * @return true if crawling of this URI should be forced
@@ -330,12 +347,12 @@ implements Serializable, Reporter, CoreAttributeConstants {
         return forceRevisit;
     }
 
-   /**
+    /**
      * Method to signal that this URI should be fetched even though
      * it already has been crawled. Setting this to true also implies
      * that this URI will be scheduled for crawl before any other waiting
      * URIs for the same host.
-     *
+     * <p>
      * This value is used to refetch any expired robots.txt or dns-lookups.
      *
      * @param b set to true to enforce the crawling of this URI
@@ -350,7 +367,8 @@ implements Serializable, Reporter, CoreAttributeConstants {
     public int getSchedulingDirective() {
         return schedulingDirective;
     }
-    /** 
+
+    /**
      * @param schedulingDirective The schedulingDirective to set.
      */
     public void setSchedulingDirective(int schedulingDirective) {
@@ -375,20 +393,20 @@ implements Serializable, Reporter, CoreAttributeConstants {
     /**
      * Tally up the number of transitive (non-simple-link) hops at
      * the end of this CandidateURI's pathFromSeed.
-     * 
+     * <p>
      * In some cases, URIs with greater than zero but less than some
-     * threshold such hops are treated specially. 
-     * 
+     * threshold such hops are treated specially.
+     * <p>
      * <p>TODO: consider moving link-count in here as well, caching
-     * calculation, and refactoring CrawlScope.exceedsMaxHops() to use this. 
-     * 
+     * calculation, and refactoring CrawlScope.exceedsMaxHops() to use this.
+     *
      * @return Transhop count.
      */
     public int getTransHops() {
         String path = getPathFromSeed();
         int transCount = 0;
-        for(int i=path.length()-1;i>=0;i--) {
-            if(path.charAt(i)==Link.NAVLINK_HOP) {
+        for (int i = path.length() - 1; i >= 0; i--) {
+            if (path.charAt(i) == Link.NAVLINK_HOP) {
                 break;
             }
             transCount++;
@@ -398,9 +416,9 @@ implements Serializable, Reporter, CoreAttributeConstants {
 
     /**
      * Given a string containing a URI, then optional whitespace
-     * delimited hops-path and via info, create a CandidateURI 
+     * delimited hops-path and via info, create a CandidateURI
      * instance.
-     * 
+     *
      * @param uriHopsViaString String with a URI.
      * @return A CandidateURI made from passed <code>uriHopsViaString</code>.
      * @throws URIException
@@ -409,35 +427,36 @@ implements Serializable, Reporter, CoreAttributeConstants {
             throws URIException {
         String args[] = uriHopsViaString.split("\\s+");
         String pathFromSeeds = (args.length > 1 && !args[1].equals("-")) ?
-                args[1]: "";
+                args[1] : "";
         UURI via = (args.length > 2 && !args[2].equals("-")) ?
                 UURIFactory.getInstance(args[2]) : null;
         CharSequence viaContext = (args.length > 3 && !args[3].equals("-")) ?
-                args[2]: null;
+                args[2] : null;
         return new CandidateURI(UURIFactory.getInstance(args[0]),
                 pathFromSeeds, via, viaContext);
     }
-    
+
     public static CandidateURI createSeedCandidateURI(UURI uuri) {
         CandidateURI c = new CandidateURI(uuri);
         c.setIsSeed(true);
         return c;
     }
-    
+
     /**
      * Utility method for creation of CandidateURIs found extracting
      * links from this CrawlURI.
+     *
      * @param baseUURI BaseUURI for <code>link</code>.
-     * @param link Link to wrap CandidateURI in.
+     * @param link     Link to wrap CandidateURI in.
      * @return New candidateURI wrapper around <code>link</code>.
      * @throws URIException
      */
     public CandidateURI createCandidateURI(UURI baseUURI, Link link)
-    throws URIException {
-        UURI u = (link.getDestination() instanceof UURI)?
-            (UURI)link.getDestination():
-            UURIFactory.getInstance(baseUURI,
-                link.getDestination().toString());
+            throws URIException {
+        UURI u = (link.getDestination() instanceof UURI) ?
+                (UURI) link.getDestination() :
+                UURIFactory.getInstance(baseUURI,
+                        link.getDestination().toString());
         CandidateURI newCaURI = new CandidateURI(u, getPathFromSeed() + link.getHopType(),
                 getUURI(), link.getContext());
         newCaURI.inheritFrom(this);
@@ -447,34 +466,35 @@ implements Serializable, Reporter, CoreAttributeConstants {
     /**
      * Utility method for creation of CandidateURIs found extracting
      * links from this CrawlURI.
-     * @param baseUURI BaseUURI for <code>link</code>.
-     * @param link Link to wrap CandidateURI in.
+     *
+     * @param baseUURI   BaseUURI for <code>link</code>.
+     * @param link       Link to wrap CandidateURI in.
      * @param scheduling How new CandidateURI should be scheduled.
-     * @param seed True if this CandidateURI is a seed.
+     * @param seed       True if this CandidateURI is a seed.
      * @return New candidateURI wrapper around <code>link</code>.
      * @throws URIException
      */
     public CandidateURI createCandidateURI(UURI baseUURI, Link link,
-        int scheduling, boolean seed)
-    throws URIException {
+                                           int scheduling, boolean seed)
+            throws URIException {
         final CandidateURI caURI = createCandidateURI(baseUURI, link);
         caURI.setSchedulingDirective(scheduling);
         caURI.setIsSeed(seed);
         return caURI;
     }
-    
+
     /**
-     * Inherit (copy) the relevant keys-values from the ancestor. 
-     * 
+     * Inherit (copy) the relevant keys-values from the ancestor.
+     *
      * @param ancestor
      */
     protected void inheritFrom(CandidateURI ancestor) {
         List heritableKeys = (List) ancestor.getObject(A_HERITABLE_KEYS);
-        if(heritableKeys!=null) {
-            getAList().copyKeysFrom(heritableKeys.iterator(),ancestor.getAList());
+        if (heritableKeys != null) {
+            getAList().copyKeysFrom(heritableKeys.iterator(), ancestor.getAList());
         }
     }
-    
+
     /**
      * Get the token (usually the hostname + port) which indicates
      * what "class" this CrawlURI should be grouped with,
@@ -492,11 +512,11 @@ implements Serializable, Reporter, CoreAttributeConstants {
     public void setClassKey(String key) {
         classKey = key;
     }
-    
+
     /**
      * Assumption is that only one thread at a time will ever be accessing
      * a particular CandidateURI.
-     * 
+     *
      * @return the attribute list.
      */
     public AList getAList() {
@@ -505,102 +525,102 @@ implements Serializable, Reporter, CoreAttributeConstants {
         }
         return this.alist;
     }
-    
+
     protected void clearAList() {
         this.alist = null;
     }
-    
+
     public void putObject(String key, Object value) {
         getAList().putObject(key, value);
     }
-    
+
     public Object getObject(String key) {
         return getAList().getObject(key);
     }
-    
+
     public String getString(String key) {
         return getAList().getString(key);
     }
-    
+
     public void putString(String key, String value) {
         getAList().putString(key, value);
     }
-    
+
     public long getLong(String key) {
         return getAList().getLong(key);
     }
-    
+
     public void putLong(String key, long value) {
         getAList().putLong(key, value);
     }
-    
+
     public int getInt(String key) {
         return getAList().getInt(key);
     }
-    
+
     public void putInt(String key, int value) {
         getAList().putInt(key, value);
     }
-    
+
     public boolean containsKey(String key) {
         return getAList().containsKey(key);
     }
-    
+
     public void remove(String key) {
         getAList().remove(key);
     }
-    
+
     public Iterator keys() {
         return getAList().getKeys();
     }
-    
+
     /**
      * @return True if this CandidateURI was result of a redirect:
-     * i.e. Its parent URI redirected to here, this URI was what was in 
+     * i.e. Its parent URI redirected to here, this URI was what was in
      * the 'Location:' or 'Content-Location:' HTTP Header.
      */
     public boolean isLocation() {
         return this.pathFromSeed != null && this.pathFromSeed.length() > 0 &&
-            this.pathFromSeed.charAt(this.pathFromSeed.length() - 1) ==
-                Link.REFER_HOP;
+                this.pathFromSeed.charAt(this.pathFromSeed.length() - 1) ==
+                        Link.REFER_HOP;
     }
 
     /**
      * Custom serialization writing 'uuri' and 'via' as Strings, rather
-     * than the bloated full serialization of their object classes, and 
+     * than the bloated full serialization of their object classes, and
      * an empty alist as 'null'. Shrinks serialized form by 50% or more
-     * in short tests. 
-     * 
+     * in short tests.
+     *
      * @param stream
      * @throws IOException
      */
     private void writeObject(ObjectOutputStream stream)
-        throws IOException {
+            throws IOException {
         stream.defaultWriteObject();
         stream.writeUTF(uuri.toString());
         stream.writeObject((via == null) ? null : via.getURI());
-        stream.writeObject((alist==null) ? null : alist);
+        stream.writeObject((alist == null) ? null : alist);
     }
 
     /**
      * Custom deserialization to reconstruct UURI instances from more
-     * compact Strings. 
-     * 
+     * compact Strings.
+     *
      * @param stream
      * @throws IOException
      * @throws ClassNotFoundException
      */
     private void readObject(ObjectInputStream stream)
-        throws IOException, ClassNotFoundException {
+            throws IOException, ClassNotFoundException {
         stream.defaultReadObject();
         uuri = readUuri(stream.readUTF());
-        via = readUuri((String)stream.readObject());
+        via = readUuri((String) stream.readObject());
         alist = (AList) stream.readObject();
     }
 
     /**
      * Read a UURI from a String, handling a null or URIException
-     * 
+     *
      * @param u String or null from which to create UURI
      * @return the best UURI instance creatable
      */
@@ -628,7 +648,7 @@ implements Serializable, Reporter, CoreAttributeConstants {
             return null;
         }
     }
-    
+
     //
     // Reporter implementation
     //
@@ -636,10 +656,10 @@ implements Serializable, Reporter, CoreAttributeConstants {
     public String singleLineReport() {
         return ArchiveUtils.singleLineReport(this);
     }
-    
+
     public void singleLineReportTo(PrintWriter w) {
         String className = this.getClass().getName();
-        className = className.substring(className.lastIndexOf(".")+1);
+        className = className.substring(className.lastIndexOf(".") + 1);
         w.print(className);
         w.print(" ");
         w.print(getUURI().toString());
@@ -655,13 +675,13 @@ implements Serializable, Reporter, CoreAttributeConstants {
     public String singleLineLegend() {
         return "className uri hopsPath viaUri";
     }
-    
+
     /* (non-Javadoc)
      * @see org.archive.util.Reporter#getReports()
      */
     public String[] getReports() {
         // none but default: empty options
-        return new String[] {};
+        return new String[]{};
     }
 
     /* (non-Javadoc)
@@ -676,42 +696,60 @@ implements Serializable, Reporter, CoreAttributeConstants {
      * @see org.archive.util.Reporter#reportTo(java.io.Writer)
      */
     public void reportTo(PrintWriter writer) throws IOException {
-        reportTo(null,writer);
+        reportTo(null, writer);
     }
 
-    /** Make the given key 'heritable', meaning its value will be 
+    /**
+     * Make the given key 'heritable', meaning its value will be
      * added to descendant CandidateURIs. Only keys with immutable
-     * values should be made heritable -- the value instance may 
-     * be shared until the AList is serialized/deserialized. 
-     * 
+     * values should be made heritable -- the value instance may
+     * be shared until the AList is serialized/deserialized.
+     *
      * @param key to make heritable
      */
     public void makeHeritable(String key) {
         @SuppressWarnings("unchecked")
         List<String> heritableKeys = (List<String>) getObject(A_HERITABLE_KEYS);
-        if(heritableKeys==null) {
+        if (heritableKeys == null) {
             heritableKeys = new ArrayList<String>();
             heritableKeys.add(A_HERITABLE_KEYS);
-            putObject(A_HERITABLE_KEYS,heritableKeys);
+            putObject(A_HERITABLE_KEYS, heritableKeys);
         }
         heritableKeys.add(key);
     }
-    
-    /** Make the given key non-'heritable', meaning its value will 
+
+    /**
+     * Make the given key non-'heritable', meaning its value will
      * not be added to descendant CandidateURIs. Only meaningful if
-     * key was previously made heritable.  
-     * 
+     * key was previously made heritable.
+     *
      * @param key to make non-heritable
      */
     public void makeNonHeritable(String key) {
         List heritableKeys = (List) getObject(A_HERITABLE_KEYS);
-        if(heritableKeys==null) {
+        if (heritableKeys == null) {
             return;
         }
         heritableKeys.remove(key);
-        if(heritableKeys.size()==1) {
+        if (heritableKeys.size() == 1) {
             // only remaining heritable key is itself; disable completely
             remove(A_HERITABLE_KEYS);
         }
+    }
+
+    /**
+     * 返回种子站点源
+     *
+     * @return
+     */
+    public String getSeedSource() {
+        if (isSeed) {
+            seedSource = toString();
+        }
+        return seedSource;
+    }
+
+    public void setSeedSource(String seedSource) {
+        this.seedSource = seedSource;
     }
 }

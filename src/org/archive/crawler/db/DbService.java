@@ -12,7 +12,7 @@ import java.util.Properties;
  * 用于数据库管理的类
  */
 public class DbService {
-    private Connection connect;
+    private static Connection connect;
     private static final String confName = "/conf/db.properties";
 
 
@@ -23,6 +23,7 @@ public class DbService {
      */
     public void insertData(DataTable data) {
         List<Object> params = new ArrayList<Object>();
+
         params.add(data.getContent());
         params.add(data.getSeed());
         params.add(data.getUrl());
@@ -75,7 +76,7 @@ public class DbService {
      */
     private Integer updateDb(String sql, List<Object> params) {
         Connection conn = getConnection();
-        boolean result = true;
+
         PreparedStatement pstmt = null;
         Integer effectRows = null;
 
@@ -97,6 +98,36 @@ public class DbService {
         }
 
         return effectRows;
+    }
+
+    /**
+     * 执行一条select语句
+     *
+     * @param
+     */
+    public ResultSet queryDb(String sql, List<Object> params) {
+        Connection conn = getConnection();
+        PreparedStatement pstmt = null;
+        ResultSet result = null;
+
+        try {
+            pstmt = conn.prepareStatement(sql);
+            for (int i = 1; i <= params.size(); i++) {
+                pstmt.setObject(i, params.get(i - 1));
+            }
+
+            result = pstmt.executeQuery();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (pstmt != null)
+                    pstmt.close();
+            } catch (SQLException se) {
+            }
+        }
+
+        return result;
     }
 
     public static void main(String[] args) {

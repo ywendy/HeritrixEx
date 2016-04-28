@@ -26,6 +26,7 @@ package org.archive.crawler.framework;
 import com.sleepycat.util.RuntimeExceptionWrapper;
 import org.archive.crawler.datamodel.*;
 import org.archive.crawler.framework.exceptions.EndedException;
+import org.archive.crawler.util.Mytools;
 import org.archive.util.*;
 
 import java.io.PrintWriter;
@@ -135,7 +136,7 @@ Reporter, ProgressStatisticsReporter {
 
                 //从Frontier取出下一个要处理的URL
                 CrawlURI curi = controller.getFrontier().next();
-                
+//                Mytools.writeFile("debug.txt",curi.toString()+"##"+curi.getSeedSource());
                 synchronized(this) {
                     continueCheck();
                     setCurrentCuri(curi);
