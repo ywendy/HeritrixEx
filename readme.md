@@ -4,3 +4,6 @@
 ## 开发环境
 + IDE:Intellij Idea
 + OS:Ubuntu
+
+## 文件结构
+crawler.sql 数据库文件 

@@ -1,9 +1,0 @@
-<component name="libraryTable">
-  <library name="cmdline-jmxclient-0.10.51">
-    <CLASSES>
-      <root url="jar://$PROJECT_DIR$/out/production/heritrix/scripts/cmdline-jmxclient-0.10.5.jar!/" />
-    </CLASSES>
-    <JAVADOC />
-    <SOURCES />
-  </library>
-</component>
