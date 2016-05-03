@@ -27,6 +27,7 @@ package org.archive.crawler.postprocessor;
 
 
 import java.sql.SQLException;
+import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -55,6 +56,9 @@ public class FrontierScheduler extends Processor
     private static Logger LOGGER =
             Logger.getLogger(FrontierScheduler.class.getName());
 
+    //URL简单去重
+    private static final HashSet<String> readlyURLs = new HashSet<>();
+
     /**
      * @param name Name of this filter.
      */
@@ -78,14 +82,6 @@ public class FrontierScheduler extends Processor
             return;
         }
 
-        try {
-            if (DataService.isUrlExist(curi.toString())) {
-                System.out.println("url已经存在");
-                return;
-            }
-        } catch (SQLException e) {
-        }
-
         synchronized (this) {
             if (StartHeritrix.doneSeeds.contains(curi.getSeedSource())) {
             } else if (curi.getLevel() > 10) {
@@ -100,10 +96,22 @@ public class FrontierScheduler extends Processor
                 }
             } else {
                 for (CandidateURI cauri : curi.getOutCandidates()) {
+                    if(readlyURLs.contains(cauri.toString()))
+                        continue;
+                    try {
+                        if (DataService.isUrlExist(cauri.toString())) {
+                            readlyURLs.add(cauri.toString());
+                            System.out.println("url已经存在");
+                            continue;
+                        }
+                    } catch (SQLException e) {
+                    }
+
                     String source = curi.getSeedSource();
                     cauri.setSeedSource(source);
                     schedule(cauri);
                 }
+                readlyURLs.add(curi.toString());
             }
         }
     }

@@ -51,7 +51,8 @@ public class DataService {
      */
     public static boolean isUrlExist(String url) throws SQLException {
         return getTable().queryBuilder().where().
-                eq("signature", Toolkit.md5Encode(url)).countOf() > 0;
+                eq("url", url).countOf() > 0;
+                //eq("signature", Toolkit.md5Encode(url)).countOf() > 0;
     }
 
     /**
