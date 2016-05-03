@@ -34,6 +34,7 @@ import org.archive.crawler.StartHeritrix;
 import org.archive.crawler.datamodel.CandidateURI;
 import org.archive.crawler.datamodel.CrawlURI;
 import org.archive.crawler.datamodel.FetchStatusCodes;
+import org.archive.crawler.db.DataService;
 import org.archive.crawler.db.SeedsService;
 import org.archive.crawler.framework.Processor;
 
@@ -77,9 +78,19 @@ public class FrontierScheduler extends Processor
             return;
         }
 
+        try {
+            if (DataService.isUrlExist(curi.toString())) {
+                System.out.println("url已经存在");
+                return;
+            }
+        } catch (SQLException e) {
+        }
+
         synchronized (this) {
             if (StartHeritrix.doneSeeds.contains(curi.getSeedSource())) {
             } else if (curi.getLevel() > 10) {
+
+                //该种子站点已经完成爬取
                 StartHeritrix.doneSeeds.add(curi.getSeedSource());
                 try {
                     SeedsService.markSeedDone(curi.getSeedSource());

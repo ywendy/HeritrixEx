@@ -14,7 +14,7 @@ public class SeedsTable {
     @DatabaseField
     private String url;
     @DatabaseField
-    private int enable; //0是开启，1是禁止
+    private int enable; //0是开启，-1是禁止,1是已完成
 
     public SeedsTable() {
 

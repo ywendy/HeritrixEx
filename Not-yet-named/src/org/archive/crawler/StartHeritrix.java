@@ -112,7 +112,7 @@ public class StartHeritrix {
      */
     public static void putSeedsFromDb() throws SQLException, IOException {
 
-        List<SeedsTable> allSeeds = SeedsService.getAllSeeds();
+        List<SeedsTable> allSeeds = SeedsService.getEnableSeeds();
         FileWriter writer = new FileWriter(seedsFilePath, false);
 
         for (SeedsTable item : allSeeds) {

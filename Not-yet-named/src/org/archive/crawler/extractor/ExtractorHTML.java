@@ -543,7 +543,7 @@ public class ExtractorHTML extends Extractor
     private static final String rejectsuffix;
 
     static {
-        rejectsuffix = NON_HTML_PATH_EXTENSION + "|(css)|(js)";
+        rejectsuffix = NON_HTML_PATH_EXTENSION + "|(css)|(js)|(ico)";
     }
 
     /**
@@ -614,6 +614,7 @@ public class ExtractorHTML extends Extractor
         if (!isHttpTransactionContentToProcess(curi)) {
             return;
         }
+
         /*如果不是html页面，则直接不经过write process*/
         if (!isHtmlMimeType(curi.getContentType()) && !isRobots(curi)) {
             curi.setFetchStatus(S_DELETED_BY_USER);
@@ -688,7 +689,11 @@ public class ExtractorHTML extends Extractor
      *             is TRANSIENT data. Make a copy if you want the data to live outside
      *             of this extractors' lifetime.
      */
-    void extract(CrawlURI curi, CharSequence cs) {
+    void extract(CrawlURI curi, CharSequence cs1) {
+
+        //去掉header部分，不从中抽取链接
+        String cs = cs1.toString().replaceAll("(?is)(<head>.*</head>)","");
+
         Matcher tags = TextUtils.getMatcher(RELEVANT_TAG_EXTRACTOR, cs);
 
         while (tags.find()) {

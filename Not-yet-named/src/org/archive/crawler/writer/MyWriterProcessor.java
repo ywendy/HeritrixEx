@@ -36,14 +36,6 @@ public class MyWriterProcessor extends MirrorWriterProcessor {
             return;
         }
 
-        try {
-            if (DataService.isUrlExist(curi.toString())) {
-                System.out.println("url已经存在");
-                return;
-            }
-        } catch (SQLException e) {
-        }
-
         //构建DataTable对象
         DataTable data = new DataTable();
         data.setContent(curi.getPageContent());

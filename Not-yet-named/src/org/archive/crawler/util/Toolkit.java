@@ -252,6 +252,18 @@ public class Toolkit {
         return charset;
     }
 
+    private final static Pattern bodyPattern = Pattern.compile("(?is).*<body>(.*)</body>.*");
+
+    public static String getBody(String pageContent)
+    {
+        Matcher matcher = bodyPattern.matcher(pageContent);
+        String result="";
+        while(matcher.find())
+        {
+           result = matcher.group(1);
+        }
+        return result;
+    }
 
     public static void main(String[] args) {
         System.out.println(System.getProperty("user.dir"));

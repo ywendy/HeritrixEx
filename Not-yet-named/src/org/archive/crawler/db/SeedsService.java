@@ -5,6 +5,8 @@ import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.stmt.UpdateBuilder;
 
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 
@@ -13,6 +15,13 @@ import java.util.List;
  */
 public class SeedsService {
     private static Dao<SeedsTable, String> seeds = null;
+    private static HashSet<Integer> enables = new HashSet<>();
+
+    static {
+        enables.add(1);
+        enables.add(0);
+        enables.add(-1);
+    }
 
     private SeedsService() {
     }
@@ -26,13 +35,32 @@ public class SeedsService {
     }
 
     /**
-     * 获取所有的种子站点
+     * 获取所有的种子列表
+     * @return 所有的种子列表
+     * @throws SQLException
+     */
+    public static List<SeedsTable> getAllSeeds() throws SQLException {
+        return getTable().queryForAll();
+    }
+    /**
+     * 根据条件获取所有的种子
+     * @param enable 0,1，-1
+     * @return 所有的种子列表
+     * @throws SQLException
+     */
+    public static List<SeedsTable> getSeeds(int enable) throws SQLException {
+        if (!enables.contains(enable))
+            return null;
+        return getTable().queryForEq("enable", enable);
+    }
+
+    /**
+     * 获取所有开启的种子站点
      *
      * @return
      * @throws SQLException
      */
-    public static List<SeedsTable> getAllSeeds() throws SQLException {
-
+    public static List<SeedsTable> getEnableSeeds() throws SQLException {
         return getTable().queryForEq("enable", 0);
     }
 
@@ -67,6 +95,7 @@ public class SeedsService {
 
     /**
      * 根据seedUrl取出一条记录
+     *
      * @param seedUrl 种子站点url
      * @return
      * @throws SQLException
@@ -77,13 +106,14 @@ public class SeedsService {
 
     /**
      * 将对应种子URl的状态置为已完成(当抓取10层时即已完成)
+     *
      * @param seedUrl
      * @throws SQLException
      */
     public static void markSeedDone(String seedUrl) throws SQLException {
         UpdateBuilder<SeedsTable, String> updateBuilder = getTable().updateBuilder();
-        updateBuilder.where().eq("url",seedUrl);
-        updateBuilder.updateColumnValue("enable",1);
+        updateBuilder.where().eq("url", seedUrl);
+        updateBuilder.updateColumnValue("enable", 1);
         updateBuilder.update();
     }
 
