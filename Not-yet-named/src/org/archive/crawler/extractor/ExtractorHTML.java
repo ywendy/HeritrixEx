@@ -543,7 +543,8 @@ public class ExtractorHTML extends Extractor
     private static final String rejectsuffix;
 
     static {
-        rejectsuffix = NON_HTML_PATH_EXTENSION + "|(css)|(js)|(ico)";
+        rejectsuffix = NON_HTML_PATH_EXTENSION + "|(css)|(js)|(ico)|(doc(x)?)|(pdf)|(rar)|(zip)"+
+        "|(xls(x)?)";
     }
 
     /**

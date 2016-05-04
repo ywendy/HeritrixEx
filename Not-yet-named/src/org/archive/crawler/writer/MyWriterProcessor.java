@@ -6,10 +6,8 @@ import org.archive.crawler.db.DataTable;
 
 import org.archive.crawler.util.Toolkit;
 import org.archive.net.UURI;
-
-
 import java.sql.Date;
-import java.sql.SQLException;
+
 
 /**
  * Created by cyh on 2016/4/16.
@@ -36,8 +34,16 @@ public class MyWriterProcessor extends MirrorWriterProcessor {
             return;
         }
 
+        String  pageContent = Toolkit.getBody(curi.getPageContent());
+
+        if(isImputy(pageContent) || pageContent.isEmpty())
+        {
+            return ;
+        }
+
         //构建DataTable对象
         DataTable data = new DataTable();
+        data.setParent(curi.getParent());
         data.setContent(curi.getPageContent());
         data.setSeed(curi.getSeedSource());
         data.setUrl(curi.toString());
@@ -47,5 +53,14 @@ public class MyWriterProcessor extends MirrorWriterProcessor {
 
         // 插入数据库中
         DataService.addOne(data);
+    }
+
+    public boolean isImputy(String pageContent)
+    {
+        if(pageContent.contains("禁止盗链， 请从本网站上下载! "))
+        {
+            return true;
+        }
+        return false;
     }
 }

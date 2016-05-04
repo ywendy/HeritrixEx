@@ -16,7 +16,7 @@ public class DataTable {
     private String url;
     @DatabaseField
     private String content;
-    @DatabaseField
+    @DatabaseField(index = true)
     private String seed;
     @DatabaseField
     private int level;
@@ -24,6 +24,8 @@ public class DataTable {
     private Date time;
     @DatabaseField(index = true)
     private String signature;
+    @DatabaseField
+    private String parent;
 
     public DataTable() {
     }
@@ -82,5 +84,12 @@ public class DataTable {
 
     public void setSignature(String signature) {
         this.signature = signature;
+    }
+    public String getParent() {
+        return parent;
+    }
+
+    public void setParent(String parent) {
+        this.parent = parent;
     }
 }

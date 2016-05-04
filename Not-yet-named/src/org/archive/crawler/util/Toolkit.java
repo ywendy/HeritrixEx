@@ -252,7 +252,7 @@ public class Toolkit {
         return charset;
     }
 
-    private final static Pattern bodyPattern = Pattern.compile("(?is).*<body>(.*)</body>.*");
+    private final static Pattern bodyPattern = Pattern.compile("(?is).*<body .*>(.*)</body>.*");
 
     public static String getBody(String pageContent)
     {
@@ -262,7 +262,7 @@ public class Toolkit {
         {
            result = matcher.group(1);
         }
-        return result;
+        return result.trim();
     }
 
     public static void main(String[] args) {

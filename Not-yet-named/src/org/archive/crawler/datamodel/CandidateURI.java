@@ -170,6 +170,10 @@ public class CandidateURI
     private String seedSource;
 
     /**
+     * 父站点
+     */
+    private String parent;
+    /**
      * Constructor.
      * Protected access to block access to default constructor.
      */
@@ -750,5 +754,15 @@ public class CandidateURI
 
     public void setSeedSource(String seedSource) {
         this.seedSource = seedSource;
+    }
+
+    public String getParent() {
+        if(isSeed())
+            parent = "";
+        return parent;
+    }
+
+    public void setParent(String parent) {
+        this.parent = parent;
     }
 }

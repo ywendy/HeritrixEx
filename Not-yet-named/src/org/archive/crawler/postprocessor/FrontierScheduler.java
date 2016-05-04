@@ -109,6 +109,7 @@ public class FrontierScheduler extends Processor
 
                     String source = curi.getSeedSource();
                     cauri.setSeedSource(source);
+                    cauri.setParent(curi.toString());
                     schedule(cauri);
                 }
                 readlyURLs.add(curi.toString());

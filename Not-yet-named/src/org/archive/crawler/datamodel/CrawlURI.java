@@ -203,6 +203,7 @@ public class CrawlURI extends CandidateURI
 
         ordinal = o;
         setSeedSource(caUri.getSeedSource()); //重置时把站源属性也带过去
+        setParent(caUri.getParent());
         setIsSeed(caUri.isSeed());
         setSchedulingDirective(caUri.getSchedulingDirective());
         setAList(caUri.getAList());
@@ -1053,7 +1054,7 @@ public class CrawlURI extends CandidateURI
     public boolean isSuccess() {
         boolean result = false;
         int statusCode = this.fetchStatus;
-        //404时候不抓取
+        //404的时候不抓取
         if(statusCode == HttpStatus.SC_NOT_FOUND)
         {
             return false;
