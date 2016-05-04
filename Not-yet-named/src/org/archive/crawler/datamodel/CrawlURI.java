@@ -1053,6 +1053,11 @@ public class CrawlURI extends CandidateURI
     public boolean isSuccess() {
         boolean result = false;
         int statusCode = this.fetchStatus;
+        //404时候不抓取
+        if(statusCode == HttpStatus.SC_NOT_FOUND)
+        {
+            return false;
+        }
         if (statusCode == HttpStatus.SC_UNAUTHORIZED &&
                 hasRfc2617CredentialAvatar()) {
             result = false;
