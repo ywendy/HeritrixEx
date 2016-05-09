@@ -2,14 +2,11 @@ package org.archive.crawler.db;
 
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
+import com.j256.ormlite.stmt.QueryBuilder;
 
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
-
-import com.j256.ormlite.stmt.QueryBuilder;
-import com.mysql.fabric.xmlrpc.base.Data;
-import org.archive.crawler.util.Toolkit;
 
 public class DataService {
     private static Dao<DataTable, String> data = null;
@@ -52,7 +49,16 @@ public class DataService {
     public static boolean isUrlExist(String url) throws SQLException {
         return getTable().queryBuilder().where().
                 eq("url", url).countOf() > 0;
-                //eq("signature", Toolkit.md5Encode(url)).countOf() > 0;
+    }
+
+    /**
+     * 返回与指定的url like的个数
+     * @param likeurl %url%
+     * @return 个数
+     * @throws SQLException
+     */
+    public static long countLikeUrl(String likeurl) throws SQLException {
+        return getTable().queryBuilder().where().like("url", likeurl).countOf();
     }
 
     /**

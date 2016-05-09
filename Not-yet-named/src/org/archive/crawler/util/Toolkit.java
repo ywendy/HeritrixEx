@@ -252,15 +252,20 @@ public class Toolkit {
         return charset;
     }
 
-    private final static Pattern bodyPattern = Pattern.compile("(?is).*<body .*>(.*)</body>.*");
+    private final static Pattern bodyPattern = Pattern.compile("(?is).*<body.*>(.*)</body>.*");
 
-    public static String getBody(String pageContent)
-    {
+    /**
+     * 获取html页面中的body部分
+     *
+     * @param pageContent 一个html页面
+     * @return body正文，不带body标签
+     */
+    public static String getBody(String pageContent) {
         Matcher matcher = bodyPattern.matcher(pageContent);
-        String result="";
-        while(matcher.find())
-        {
-           result = matcher.group(1);
+        String result = "";
+        while (matcher.find()) {
+            result = matcher.group(0) + matcher.group(1);
+            break;
         }
         return result.trim();
     }

@@ -1,8 +1,5 @@
 package org.archive.crawler.db;
 
-import org.archive.crawler.util.*;
-
-
 import java.io.IOException;
 import java.sql.SQLException;
 
@@ -24,9 +21,10 @@ public class Helper {
 
        // String html ="<html><head>\n</head><BODY 12=''>1232</body></html>";
        // String te=html.replaceAll("(?is)(<head>.*</head>)","");
-        String te = Toolkit.getBody("");
-        System.out.println(te);
+//        String te = Toolkit.getBody("<body id=\"12\">"+System.lineSeparator()+"asddadsf</body>");
+//        System.out.println(te);
       //  System.out.println(DataService.isUrlExist("http://econ.whut.edu.cn/"));
 
+        System.out.println(DataService.countLikeUrl("http://cs.whu.edu.cn/plus/list.php%"));
     }
 }

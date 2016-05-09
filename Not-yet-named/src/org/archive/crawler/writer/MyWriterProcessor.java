@@ -6,11 +6,13 @@ import org.archive.crawler.db.DataTable;
 
 import org.archive.crawler.util.Toolkit;
 import org.archive.net.UURI;
+
 import java.sql.Date;
 
 
 /**
  * Created by cyh on 2016/4/16.
+ *
  * @Author cyh
  * @Date 2016/4/16
  */
@@ -34,17 +36,18 @@ public class MyWriterProcessor extends MirrorWriterProcessor {
             return;
         }
 
-        String  pageContent = Toolkit.getBody(curi.getPageContent());
 
-        if(isImputy(pageContent) || pageContent.isEmpty())
-        {
-            return ;
+        String pageContent = Toolkit.getBody(curi.getPageContent());
+
+        if (isImputy(pageContent) || pageContent.isEmpty()) {
+            System.err.println("网页内容为空");
+            return;
         }
 
         //构建DataTable对象
         DataTable data = new DataTable();
         data.setParent(curi.getParent());
-        data.setContent(curi.getPageContent());
+        data.setContent(pageContent);
         data.setSeed(curi.getSeedSource());
         data.setUrl(curi.toString());
         data.setLevel(curi.getLevel());
@@ -55,10 +58,8 @@ public class MyWriterProcessor extends MirrorWriterProcessor {
         DataService.addOne(data);
     }
 
-    public boolean isImputy(String pageContent)
-    {
-        if(pageContent.contains("禁止盗链， 请从本网站上下载! "))
-        {
+    public boolean isImputy(String pageContent) {
+        if (pageContent.contains("禁止盗链， 请从本网站上下载! ")) {
             return true;
         }
         return false;

@@ -26,18 +26,21 @@
 package org.archive.crawler.postprocessor;
 
 
+import org.archive.crawler.StartHeritrix;
+import org.archive.crawler.datamodel.CandidateURI;
+import org.archive.crawler.datamodel.CrawlURI;
+import org.archive.crawler.datamodel.FetchStatusCodes;
+import org.archive.crawler.db.SeedsService;
+import org.archive.crawler.framework.Processor;
+
 import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.archive.crawler.StartHeritrix;
-import org.archive.crawler.datamodel.CandidateURI;
-import org.archive.crawler.datamodel.CrawlURI;
-import org.archive.crawler.datamodel.FetchStatusCodes;
-import org.archive.crawler.db.DataService;
-import org.archive.crawler.db.SeedsService;
-import org.archive.crawler.framework.Processor;
+import static org.archive.crawler.db.DataService.countLikeUrl;
+import static org.archive.crawler.db.DataService.isUrlExist;
+
 
 /**
  * 'Schedule' with the Frontier CandidateURIs being carried by the passed
@@ -58,6 +61,11 @@ public class FrontierScheduler extends Processor
 
     //URL简单去重
     private static final HashSet<String> readlyURLs = new HashSet<>();
+
+    //该页面会重复下载几万次，故在去重阶段进行判断
+    private static boolean isListExist = false;
+    private static final String listUrlPrex = "http://cs.whu.edu.cn/plus/list.php";
+
 
     /**
      * @param name Name of this filter.
@@ -82,6 +90,7 @@ public class FrontierScheduler extends Processor
             return;
         }
 
+
         synchronized (this) {
             if (StartHeritrix.doneSeeds.contains(curi.getSeedSource())) {
             } else if (curi.getLevel() > 10) {
@@ -96,14 +105,25 @@ public class FrontierScheduler extends Processor
                 }
             } else {
                 for (CandidateURI cauri : curi.getOutCandidates()) {
-                    if(readlyURLs.contains(cauri.toString()))
+                    if (readlyURLs.contains(cauri.toString()))
                         continue;
                     try {
-                        if (DataService.isUrlExist(cauri.toString())) {
+                        if (isUrlExist(cauri.toString())) {
                             readlyURLs.add(cauri.toString());
                             System.out.println("url已经存在");
                             continue;
                         }
+
+                        if (cauri.toString().startsWith(listUrlPrex)) {
+                            if (isListExist) {
+                                continue;
+                            } else if (countLikeUrl(listUrlPrex + "%") >= 2) {
+                                //TODO 可优化为Trie树
+                                isListExist = true;
+                                continue;
+                            }
+                        }
+
                     } catch (SQLException e) {
                     }
 
