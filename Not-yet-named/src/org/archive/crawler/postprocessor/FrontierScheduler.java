@@ -30,8 +30,10 @@ import org.archive.crawler.StartHeritrix;
 import org.archive.crawler.datamodel.CandidateURI;
 import org.archive.crawler.datamodel.CrawlURI;
 import org.archive.crawler.datamodel.FetchStatusCodes;
+import org.archive.crawler.datamodel.SysConfig;
 import org.archive.crawler.db.SeedsService;
 import org.archive.crawler.framework.Processor;
+import org.archive.crawler.util.Toolkit;
 
 import java.sql.SQLException;
 import java.util.HashSet;
@@ -93,46 +95,58 @@ public class FrontierScheduler extends Processor
 
         synchronized (this) {
             if (StartHeritrix.doneSeeds.contains(curi.getSeedSource())) {
-            } else if (curi.getLevel() > 10) {
+            } else try {
+                if (curi.getLevel() > SysConfig.getDepth()) {
 
-                //该种子站点已经完成爬取
-                StartHeritrix.doneSeeds.add(curi.getSeedSource());
-                try {
-                    SeedsService.markSeedDone(curi.getSeedSource());
-                } catch (SQLException e) {
-                    //e.printStackTrace();
-                    LOGGER.info(getName() + "标志为完成时错误" + curi);
-                }
-            } else {
-                for (CandidateURI cauri : curi.getOutCandidates()) {
-                    if (readlyURLs.contains(cauri.toString()))
-                        continue;
+                    //该种子站点已经完成爬取
+                    StartHeritrix.doneSeeds.add(curi.getSeedSource());
                     try {
-                        if (isUrlExist(cauri.toString())) {
-                            readlyURLs.add(cauri.toString());
-                            System.out.println("url已经存在");
+                        SeedsService.markSeedDone(curi.getSeedSource());
+                    } catch (SQLException e) {
+                        //e.printStackTrace();
+                        LOGGER.info(getName() + "标志为完成时错误" + curi);
+                    }
+                } else {
+                    for (CandidateURI cauri : curi.getOutCandidates()) {
+
+                        if(!isCommonDomain(cauri.toString(),curi.toString()))
+                        {
+                            //检测是否是同一Domain下
                             continue;
                         }
 
-                        if (cauri.toString().startsWith(listUrlPrex)) {
-                            if (isListExist) {
-                                continue;
-                            } else if (countLikeUrl(listUrlPrex + "%") >= 2) {
-                                //TODO 可优化为Trie树
-                                isListExist = true;
+                        String nowUrl = Toolkit.trimSlash(cauri.toString());
+                        if (readlyURLs.contains(nowUrl))
+                            continue;
+                        try {
+                            if (isUrlExist(nowUrl)) {
+                                readlyURLs.add(cauri.toString());
+                                System.out.println("url已经存在");
                                 continue;
                             }
+
+                            if (nowUrl.startsWith(listUrlPrex)) {
+                                if (isListExist) {
+                                    continue;
+                                } else if (countLikeUrl(listUrlPrex + "%") >= 2) {
+                                    //TODO 可优化为Trie树
+                                    isListExist = true;
+                                    continue;
+                                }
+                            }
+
+                        } catch (SQLException e) {
                         }
 
-                    } catch (SQLException e) {
+                        String source = curi.getSeedSource();
+                        cauri.setSeedSource(source);
+                        cauri.setParent(nowUrl);
+                        schedule(cauri);
                     }
-
-                    String source = curi.getSeedSource();
-                    cauri.setSeedSource(source);
-                    cauri.setParent(curi.toString());
-                    schedule(cauri);
+                    readlyURLs.add(curi.toString());
                 }
-                readlyURLs.add(curi.toString());
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
         }
     }
@@ -148,5 +162,10 @@ public class FrontierScheduler extends Processor
      */
     protected void schedule(CandidateURI caUri) {
         getController().getFrontier().schedule(caUri);
+    }
+
+    private boolean isCommonDomain(String sourceUrl,String url)
+    {
+        return Toolkit.getDomainForUrl(sourceUrl).equals(Toolkit.getDomainForUrl(url));
     }
 }

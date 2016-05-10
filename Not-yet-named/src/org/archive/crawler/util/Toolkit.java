@@ -7,14 +7,10 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-
 import java.io.*;
-
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
-
 import java.util.Properties;
-
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -268,6 +264,49 @@ public class Toolkit {
             break;
         }
         return result.trim();
+    }
+
+    /**
+     * @param url 网址
+     * @return 去除url尾部多余的斜杠
+     */
+    public static String trimSlash(String url) {
+        if (url == null || url.trim().isEmpty())
+            return url;
+        url = url.trim();
+        int length = url.length();
+        if (length == 1 && url.charAt(0) == '/')
+            return url;
+
+        while (url.charAt(length - 1) == '/' && length > 1)
+            length--;
+        return url.substring(0, length);
+    }
+
+    private static final String domainSuffix = "(org|net|gov|edu|com)(\\.cn)?" +
+            "|cn|biz|info|cc|tv|me|xyz";
+    private static final String domainRegex = "^http(s)?://(www\\.)?([^/]*\\." + domainSuffix + ")";
+    private static final Pattern domainPattern = Pattern.compile(domainRegex);
+
+    /**
+     * 得到
+     * @param url 该url要求比较严格，必须以http开头
+     * @return
+     */
+    public static String getDomainForUrl(String url) {
+        String domain = null;
+        if (url == null) {
+            return null;
+        } else {
+            Matcher m = domainPattern.matcher(url);
+            while (m.find()) {
+                System.out.println("hello");
+                System.out.println();
+                domain = m.group(3);
+                break;
+            }
+        }
+        return domain;
     }
 
     public static void main(String[] args) {

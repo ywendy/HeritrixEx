@@ -5,7 +5,6 @@ import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.stmt.UpdateBuilder;
 
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
@@ -116,5 +115,4 @@ public class SeedsService {
         updateBuilder.updateColumnValue("enable", 1);
         updateBuilder.update();
     }
-
 }

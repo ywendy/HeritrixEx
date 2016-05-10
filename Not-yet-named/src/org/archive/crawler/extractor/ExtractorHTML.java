@@ -526,10 +526,10 @@ public class ExtractorHTML extends Extractor
             if (logger.isLoggable(Level.FINEST)) {
                 logger.finest("link: " + value.toString() + " from " + curi);
             }
-            if (!checkHost(curi.toString(), value.toString())) {
-//                Toolkit.writeFile("debug.txt","[REJECT] "+value.toString());
-                return;
-            }
+//            if (!checkHost(curi.toString(), value.toString())) {
+////                Toolkit.writeFile("debug.txt","[REJECT] "+value.toString());
+//                return;
+//            }
 //            Toolkit.writeFile("debug.txt","[2PASS] "+value.toString());
             addLinkFromString(curi, value, context, Link.NAVLINK_HOP);
             this.numberOfLinksExtracted++;
@@ -599,10 +599,10 @@ public class ExtractorHTML extends Extractor
             logger.finest("embed (" + hopType + "): " + value.toString() +
                     " from " + curi);
         }
-        if (!checkHost(curi.toString(), value.toString())) {
-//            Toolkit.writeFile("debug.txt","[REJECT] "+value.toString());
-            return;
-        }
+//        if (!checkHost(curi.toString(), value.toString())) {
+////            Toolkit.writeFile("debug.txt","[REJECT] "+value.toString());
+//            return;
+//        }
 //        Toolkit.writeFile("debug.txt","[1PASS] "+ value);
         addLinkFromString(curi,
                 (value instanceof String) ?

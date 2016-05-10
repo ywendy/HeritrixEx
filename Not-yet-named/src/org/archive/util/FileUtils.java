@@ -45,75 +45,77 @@ import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 
-/** Utility methods for manipulating files and directories.
+/**
+ * Utility methods for manipulating files and directories.
  *
  * @author John Erik Halse
  */
 public class FileUtils {
     private static final Logger LOGGER =
-        Logger.getLogger(FileUtils.class.getName());
-    
+            Logger.getLogger(FileUtils.class.getName());
+
     public static final File TMPDIR =
-        new File(System.getProperty("java.io.tmpdir", "/tmp"));
-    
+            new File(System.getProperty("java.io.tmpdir", "/tmp"));
+
     private static final boolean DEFAULT_OVERWRITE = true;
-    
+
     /**
      * Constructor made private because all methods of this class are static.
      */
     private FileUtils() {
         super();
     }
-    
+
     public static int copyFiles(final File srcDir, Set srcFile,
-            final File dest)
-    throws IOException {
+                                final File dest)
+            throws IOException {
         int count = 0;
-        for (Iterator i = srcFile.iterator(); i.hasNext();) {
-            String name = (String)i.next();
+        for (Iterator i = srcFile.iterator(); i.hasNext(); ) {
+            String name = (String) i.next();
             File src = new File(srcDir, name);
             File tgt = new File(dest, name);
             if (LOGGER.isLoggable(Level.FINE)) {
                 LOGGER.fine("Before " + src.getAbsolutePath() + " " +
-                    src.exists() + ", " + tgt.getAbsolutePath() + " " +
-                    tgt.exists());
+                        src.exists() + ", " + tgt.getAbsolutePath() + " " +
+                        tgt.exists());
             }
             copyFiles(src, tgt);
             if (LOGGER.isLoggable(Level.FINE)) {
                 LOGGER.fine("After " + src.getAbsolutePath() + " " +
-                    src.exists() + ", " + tgt.getAbsolutePath() + " " +
-                    tgt.exists());
+                        src.exists() + ", " + tgt.getAbsolutePath() + " " +
+                        tgt.exists());
             }
             count++;
         }
         return count;
     }
 
-    /** Recursively copy all files from one directory to another.
+    /**
+     * Recursively copy all files from one directory to another.
      *
-     * @param src file or directory to copy from.
+     * @param src  file or directory to copy from.
      * @param dest file or directory to copy to.
      * @throws IOException
      */
     public static void copyFiles(File src, File dest)
-    throws IOException {
+            throws IOException {
         copyFiles(src, null, dest, false, true, null);
     }
-    
+
     /**
-     * @param src Directory of files to fetch.
+     * @param src    Directory of files to fetch.
      * @param filter Filter to apply to filenames.
      * @return Files in directory sorted.
      */
-    public static String [] getSortedDirContent(final File src,
-            final FilenameFilter filter) {
+    public static String[] getSortedDirContent(final File src,
+                                               final FilenameFilter filter) {
         if (!src.exists()) {
             if (LOGGER.isLoggable(Level.FINE)) {
                 LOGGER.fine(src.getAbsolutePath() + " does not exist");
             }
             return null;
         }
-       
+
         if (!src.isDirectory()) {
             if (LOGGER.isLoggable(Level.FINE)) {
                 LOGGER.fine(src.getAbsolutePath() + " is not directory.");
@@ -121,52 +123,52 @@ public class FileUtils {
             return null;
         }
         // Go through the contents of the directory
-        String [] list = (filter == null)? src.list(): src.list(filter);
+        String[] list = (filter == null) ? src.list() : src.list(filter);
         if (list != null) {
             Arrays.sort(list);
         }
         return list;
     }
-        
+
     /**
      * Recursively copy all files from one directory to another.
-     * 
-     * @param src File or directory to copy from.
-     * @param filter Filename filter to apply to src. May be null if no
-     * filtering wanted.
-     * @param dest File or directory to copy to.
+     *
+     * @param src           File or directory to copy from.
+     * @param filter        Filename filter to apply to src. May be null if no
+     *                      filtering wanted.
+     * @param dest          File or directory to copy to.
      * @param inSortedOrder Copy in order of natural sort.
-     * @param overwrite If target file already exits, and this parameter is
-     * true, overwrite target file (We do this by first deleting the target
-     * file before we begin the copy).
+     * @param overwrite     If target file already exits, and this parameter is
+     *                      true, overwrite target file (We do this by first deleting the target
+     *                      file before we begin the copy).
      * @throws IOException
      */
     public static void copyFiles(final File src, final FilenameFilter filter,
-        final File dest, final boolean inSortedOrder, final boolean overwrite)
-    throws IOException {
+                                 final File dest, final boolean inSortedOrder, final boolean overwrite)
+            throws IOException {
         copyFiles(src, filter, dest, inSortedOrder, overwrite, null);
     }
 
     /**
      * Recursively copy all files from one directory to another.
-     * 
-     * @param src File or directory to copy from.
-     * @param filter Filename filter to apply to src. May be null if no
-     * filtering wanted.
-     * @param dest File or directory to copy to.
+     *
+     * @param src           File or directory to copy from.
+     * @param filter        Filename filter to apply to src. May be null if no
+     *                      filtering wanted.
+     * @param dest          File or directory to copy to.
      * @param inSortedOrder Copy in order of natural sort.
-     * @param overwrite If target file already exits, and this parameter is
-     * true, overwrite target file (We do this by first deleting the target
-     * file before we begin the copy).
-     * @param exceptions if non-null, add any individual-file IOExceptions
-     * to this List rather than throwing, and proceed with the deep copy
+     * @param overwrite     If target file already exits, and this parameter is
+     *                      true, overwrite target file (We do this by first deleting the target
+     *                      file before we begin the copy).
+     * @param exceptions    if non-null, add any individual-file IOExceptions
+     *                      to this List rather than throwing, and proceed with the deep copy
      * @return TODO
      * @throws IOException
      */
     public static void copyFiles(final File src, final FilenameFilter filter,
-        final File dest, final boolean inSortedOrder, final boolean overwrite, 
-        List<IOException> exceptions)
-    throws IOException {
+                                 final File dest, final boolean inSortedOrder, final boolean overwrite,
+                                 List<IOException> exceptions)
+            throws IOException {
         // TODO: handle failures at any step
         if (!src.exists()) {
             if (LOGGER.isLoggable(Level.FINE)) {
@@ -184,13 +186,13 @@ public class FileUtils {
                 dest.mkdirs();
             }
             // Go through the contents of the directory
-            String list[] = (filter == null)? src.list(): src.list(filter);
+            String list[] = (filter == null) ? src.list() : src.list(filter);
             if (inSortedOrder) {
                 Arrays.sort(list);
             }
             for (int i = 0; i < list.length; i++) {
                 copyFiles(new File(src, list[i]), filter,
-                    new File(dest, list[i]), inSortedOrder, overwrite, exceptions);
+                        new File(dest, list[i]), inSortedOrder, overwrite, exceptions);
             }
         } else {
             try {
@@ -208,7 +210,7 @@ public class FileUtils {
 
     /**
      * Copy the src file to the destination.
-     * 
+     *
      * @param src
      * @param dest
      * @return True if the extent was greater than actual bytes copied.
@@ -216,28 +218,28 @@ public class FileUtils {
      * @throws IOException
      */
     public static boolean copyFile(final File src, final File dest)
-    throws FileNotFoundException, IOException {
+            throws FileNotFoundException, IOException {
         return copyFile(src, dest, -1, DEFAULT_OVERWRITE);
     }
-    
+
     /**
      * Copy the src file to the destination.
-     * 
+     *
      * @param src
      * @param dest
      * @param overwrite If target file already exits, and this parameter is
-     * true, overwrite target file (We do this by first deleting the target
-     * file before we begin the copy).
+     *                  true, overwrite target file (We do this by first deleting the target
+     *                  file before we begin the copy).
      * @return True if the extent was greater than actual bytes copied.
      * @throws FileNotFoundException
      * @throws IOException
      */
     public static boolean copyFile(final File src, final File dest,
-        final boolean overwrite)
-    throws FileNotFoundException, IOException {
+                                   final boolean overwrite)
+            throws FileNotFoundException, IOException {
         return copyFile(src, dest, -1, overwrite);
     }
-    
+
     /**
      * Copy up to extent bytes of the source file to the destination
      *
@@ -249,31 +251,31 @@ public class FileUtils {
      * @throws IOException
      */
     public static boolean copyFile(final File src, final File dest,
-        long extent)
-    throws FileNotFoundException, IOException {
+                                   long extent)
+            throws FileNotFoundException, IOException {
         return copyFile(src, dest, extent, DEFAULT_OVERWRITE);
     }
 
-	/**
+    /**
      * Copy up to extent bytes of the source file to the destination
      *
      * @param src
      * @param dest
-     * @param extent Maximum number of bytes to copy
-	 * @param overwrite If target file already exits, and this parameter is
-     * true, overwrite target file (We do this by first deleting the target
-     * file before we begin the copy).
-	 * @return True if the extent was greater than actual bytes copied.
+     * @param extent    Maximum number of bytes to copy
+     * @param overwrite If target file already exits, and this parameter is
+     *                  true, overwrite target file (We do this by first deleting the target
+     *                  file before we begin the copy).
+     * @return True if the extent was greater than actual bytes copied.
      * @throws FileNotFoundException
      * @throws IOException
      */
     public static boolean copyFile(final File src, final File dest,
-        long extent, final boolean overwrite)
-    throws FileNotFoundException, IOException {
+                                   long extent, final boolean overwrite)
+            throws FileNotFoundException, IOException {
         boolean result = false;
         if (LOGGER.isLoggable(Level.FINE)) {
             LOGGER.fine("Copying file " + src + " to " + dest + " extent " +
-                extent + " exists " + dest.exists());
+                    extent + " exists " + dest.exists());
         }
         if (dest.exists()) {
             if (overwrite) {
@@ -303,20 +305,20 @@ public class FileUtils {
             if (trans < extent) {
                 result = false;
             }
-            result = true; 
+            result = true;
         } catch (IOException e) {
             // Add more info to the exception. Preserve old stacktrace.
             // We get 'Invalid argument' on some file copies. See
             // http://intellij.net/forums/thread.jsp?forum=13&thread=63027&message=853123
             // for related issue.
             String message = "Copying " + src.getAbsolutePath() + " to " +
-                dest.getAbsolutePath() + " with extent " + extent +
-                " got IOE: " + e.getMessage();
+                    dest.getAbsolutePath() + " with extent " + extent +
+                    " got IOE: " + e.getMessage();
             if (e.getMessage().equals("Invalid argument")) {
                 LOGGER.severe("Failed copy, trying workaround: " + message);
                 workaroundCopyFile(src, dest);
             } else {
-                LOGGER.log(Level.SEVERE,message,e);
+                LOGGER.log(Level.SEVERE, message, e);
                 // rethrow
                 throw e;
             }
@@ -337,10 +339,10 @@ public class FileUtils {
         }
         return result;
     }
-    
+
     protected static void workaroundCopyFile(final File src,
-            final File dest)
-    throws IOException {
+                                             final File dest)
+            throws IOException {
         FileInputStream from = null;
         FileOutputStream to = null;
         try {
@@ -369,15 +371,17 @@ public class FileUtils {
         }
     }
 
-	/** Deletes all files and subdirectories under dir.
+    /**
+     * Deletes all files and subdirectories under dir.
+     *
      * @param dir
      * @return true if all deletions were successful. If a deletion fails, the
-     *          method stops attempting to delete and returns false.
+     * method stops attempting to delete and returns false.
      */
     public static boolean deleteDir(File dir) {
         if (dir.isDirectory()) {
             String[] children = dir.list();
-            for (int i=0; i<children.length; i++) {
+            for (int i = 0; i < children.length; i++) {
                 boolean success = deleteDir(new File(dir, children[i]));
                 if (!success) {
                     return false;
@@ -387,7 +391,6 @@ public class FileUtils {
         // The directory is now empty so delete it
         return dir.delete();
     }
-
 
 
     /**
@@ -401,16 +404,16 @@ public class FileUtils {
         StringBuffer sb = new StringBuffer((int) file.length());
         String line;
         BufferedReader br = new BufferedReader(new InputStreamReader(
-        		new FileInputStream(file)));
+                new FileInputStream(file)));
         try {
-        	    line = br.readLine();
-        	    while (line != null) {
-        	    	    sb.append(line);
-                        sb.append("\n");
-        	    	    line = br.readLine();
-        	    }
+            line = br.readLine();
+            while (line != null) {
+                sb.append(line);
+                sb.append("\n");
+                line = br.readLine();
+            }
         } finally {
-        	    br.close();
+            br.close();
         }
         return sb.toString();
     }
@@ -418,23 +421,22 @@ public class FileUtils {
     /**
      * Get a list of all files in directory that have passed prefix.
      *
-     * @param dir Dir to look in.
+     * @param dir    Dir to look in.
      * @param prefix Basename of files to look for. Compare is case insensitive.
-     *
      * @return List of files in dir that start w/ passed basename.
      */
-    public static File [] getFilesWithPrefix(File dir, final String prefix) {
+    public static File[] getFilesWithPrefix(File dir, final String prefix) {
         FileFilter prefixFilter = new FileFilter() {
-                public boolean accept(File pathname)
-                {
-                    return pathname.getName().toLowerCase().
+            public boolean accept(File pathname) {
+                return pathname.getName().toLowerCase().
                         startsWith(prefix.toLowerCase());
-                }
-            };
+            }
+        };
         return dir.listFiles(prefixFilter);
     }
 
-    /** Get a @link java.io.FileFilter that filters files based on a regular
+    /**
+     * Get a @link java.io.FileFilter that filters files based on a regular
      * expression.
      *
      * @param regexp the regular expression the files must match.
@@ -456,18 +458,19 @@ public class FileUtils {
 
         return new RegexpFileFilter(regexp);
     }
-    
+
     /**
      * Use for case where files are being added to src.  Will break off copy
      * when tgt is same as src.
-     * @param src Source directory to copy from.
-     * @param tgt Target to copy to.
+     *
+     * @param src    Source directory to copy from.
+     * @param tgt    Target to copy to.
      * @param filter Filter to apply to files to copy.
      * @throws IOException
      */
     public static void syncDirectories(final File src,
-            final FilenameFilter filter, final File tgt)
-    throws IOException {
+                                       final FilenameFilter filter, final File tgt)
+            throws IOException {
         Set<String> srcFilenames = null;
         do {
             srcFilenames = new HashSet<String>(Arrays.asList(src.list(filter)));
@@ -481,50 +484,51 @@ public class FileUtils {
             }
         } while (srcFilenames != null && srcFilenames.size() > 0);
     }
-    
+
     /**
      * Test file exists and is readable.
+     *
      * @param f File to test.
-     * @exception IOException If file does not exist or is not unreadable.
+     * @throws IOException If file does not exist or is not unreadable.
      */
     public static File isReadable(final File f) throws IOException {
         if (!f.exists()) {
             throw new FileNotFoundException(f.getAbsolutePath() +
-                " does not exist.");
+                    " does not exist.");
         }
 
         if (!f.canRead()) {
             throw new FileNotFoundException(f.getAbsolutePath() +
-                " is not readable.");
+                    " is not readable.");
         }
-        
+
         return f;
     }
-    
+
     /**
      * @param f File to test.
      * @return True if file is readable, has uncompressed extension,
      * and magic string at file start.
-     * @exception IOException If file does not exist or is not readable.
+     * @throws IOException If file does not exist or is not readable.
      */
-    public static boolean isReadableWithExtensionAndMagic(final File f, 
-            final String uncompressedExtension, final String magic)
-    throws IOException {
+    public static boolean isReadableWithExtensionAndMagic(final File f,
+                                                          final String uncompressedExtension, final String magic)
+            throws IOException {
         boolean result = false;
         FileUtils.isReadable(f);
-        if(f.getName().toLowerCase().endsWith(uncompressedExtension)) {
+        if (f.getName().toLowerCase().endsWith(uncompressedExtension)) {
             FileInputStream fis = new FileInputStream(f);
             try {
-                byte [] b = new byte[magic.length()];
+                byte[] b = new byte[magic.length()];
                 int read = fis.read(b, 0, magic.length());
                 fis.close();
                 if (read == magic.length()) {
                     StringBuffer beginStr
-                        = new StringBuffer(magic.length());
+                            = new StringBuffer(magic.length());
                     for (int i = 0; i < magic.length(); i++) {
-                        beginStr.append((char)b[i]);
+                        beginStr.append((char) b[i]);
                     }
-                    
+
                     if (beginStr.toString().
                             equalsIgnoreCase(magic)) {
                         result = true;
@@ -537,18 +541,18 @@ public class FileUtils {
 
         return result;
     }
-    
+
     /**
-     * Turn path into a File, relative to context (which may be ignored 
-     * if path is absolute). 
-     * 
+     * Turn path into a File, relative to context (which may be ignored
+     * if path is absolute).
+     *
      * @param context File context if path is relative
-     * @param path String path to make into a File
+     * @param path    String path to make into a File
      * @return File created
      */
     public static File maybeRelative(File context, String path) {
         File f = new File(path);
-        if(f.isAbsolute()) {
+        if (f.isAbsolute()) {
             return f;
         }
         return new File(context, path);
@@ -556,49 +560,73 @@ public class FileUtils {
 
     /**
      * Delete the file now -- but in the event of failure, keep trying
-     * in the future. 
-     * 
-     * VERY IMPORTANT: Do not use with any file whose name/path may be 
+     * in the future.
+     * <p/>
+     * VERY IMPORTANT: Do not use with any file whose name/path may be
      * reused, because the lagged delete could then wind up deleting the
      * newer file. Essentially, only to be used with uniquely-named temp
-     * files. 
-     * 
-     * Necessary because some platforms (looking at you, 
-     * JVM-on-Windows) will have deletes fail because of things like 
-     * file-mapped buffers remaining, and there's no explicit way to 
+     * files.
+     * <p/>
+     * Necessary because some platforms (looking at you,
+     * JVM-on-Windows) will have deletes fail because of things like
+     * file-mapped buffers remaining, and there's no explicit way to
      * unmap a buffer. (See 6-year-old Sun-stumping Java bug
      * http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4724038 )
-     * We just have to wait and retry. 
-     * 
-     * (Why not just File.deleteOnExit? There could be an arbitrary, 
-     * unbounded number of files in such a situation, that are only 
+     * We just have to wait and retry.
+     * <p/>
+     * (Why not just File.deleteOnExit? There could be an arbitrary,
+     * unbounded number of files in such a situation, that are only
      * deletable a few seconds or minutes after our first attempt.
      * Waiting for JVM exist could mean disk exhaustion. It's also
      * unclear if the native FS class implementations of deleteOnExit
      * use RAM per pending file.)
-     * 
+     *
      * @param fileToDelete
      */
     public static synchronized void deleteSoonerOrLater(File fileToDelete) {
         pendingDeletes.add(fileToDelete);
         // if things are getting out of hand, force gc/finalization
-        if(pendingDeletes.size()>50) {
+        if (pendingDeletes.size() > 50) {
             LOGGER.warning(">50 pending Files to delete; forcing gc/finalization");
             System.gc();
             System.runFinalization();
         }
         // try all pendingDeletes
         Iterator<File> iter = pendingDeletes.listIterator();
-        while(iter.hasNext()) {
-            File pending = iter.next(); 
-            if(pending.delete()) {
+        while (iter.hasNext()) {
+            File pending = iter.next();
+            if (pending.delete()) {
                 iter.remove();
             }
         }
         // if things are still out of hand, complain loudly
-        if(pendingDeletes.size()>50) {
+        if (pendingDeletes.size() > 50) {
             LOGGER.severe(">50 pending Files to delete even after gc/finalization");
         }
     }
-    static LinkedList<File> pendingDeletes = new LinkedList<File>(); 
+
+    static LinkedList<File> pendingDeletes = new LinkedList<File>();
+
+    /**
+     *
+     * @param path 文件路径
+     * @return 将文件映射为set
+     * @throws IOException
+     */
+    public static HashSet<String> readFileAsSet(String path) throws IOException {
+        File file = new File(path);
+        HashSet<String> result = new HashSet<>();
+        String line;
+        BufferedReader br = new BufferedReader(new InputStreamReader(
+                new FileInputStream(file)));
+
+        line = br.readLine();
+        while (line != null) {
+            result.add(line);
+            line = br.readLine();
+        }
+        br.close();
+
+        return result;
+    }
 }
