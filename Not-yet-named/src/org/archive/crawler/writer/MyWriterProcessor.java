@@ -46,10 +46,10 @@ public class MyWriterProcessor extends MirrorWriterProcessor {
 
         //构建DataTable对象
         DataTable data = new DataTable();
-        data.setParent(curi.getParent());
+        data.setParent(Toolkit.trimSlash(curi.getParent()));
         data.setContent(pageContent);
-        data.setSeed(curi.getSeedSource());
-        data.setUrl(curi.toString());
+        data.setSeed(Toolkit.trimSlash(curi.getSeedSource()));
+        data.setUrl(Toolkit.trimSlash(curi.toString()));
         data.setLevel(curi.getLevel());
         data.setTime(new Date(System.currentTimeMillis()));
         data.setSignature(Toolkit.md5Encode(curi.toString()));

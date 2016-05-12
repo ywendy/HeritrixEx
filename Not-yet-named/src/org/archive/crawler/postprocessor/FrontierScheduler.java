@@ -92,8 +92,6 @@ public class FrontierScheduler extends Processor
             handlePrerequisites(curi);
             return;
         }
-
-
         synchronized (this) {
             if (StartHeritrix.doneSeeds.contains(curi.getSeedSource())) {
             } else try {
