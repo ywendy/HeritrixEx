@@ -566,9 +566,9 @@ public class ExtractorHTML extends Extractor
     protected void addLinkFromString(CrawlURI curi, CharSequence uri,
                                      CharSequence context, char hopType) {
 
-        if (isRejectSuffix(uri.toString())) {
-            return;
-        }
+//        if (isRejectSuffix(uri.toString())) {
+//            return;
+//        }
 
         try {
             // We do a 'toString' on context because its a sequence from

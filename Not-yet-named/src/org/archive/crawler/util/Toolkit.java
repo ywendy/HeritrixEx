@@ -75,32 +75,33 @@ public class Toolkit {
     /**
      * 获取链接的后缀名
      *
-     * @return
+     * @return 后缀，若检测不到为空
      */
     public static String parseSuffix(String url) {
 
-        if (url.endsWith("/"))
+        if (url == null || url.isEmpty())
             return "";
 
-        String[] spUrl = url.toString().split("/");
-        int len = spUrl.length;
-        if (len == 0) {
-            return "";
-        }
-        String endUrl = spUrl[len - 1];
-        if (!endUrl.contains("."))
-            return "";
+        url = trimSlash(url.replaceAll("http(s?)://", ""));
 
-        String[] exts = null;
-        Matcher matcher = pattern.matcher(url);
-        if (matcher.find()) {
-            String[] spEndUrl = endUrl.split("\\?");
-            exts = spEndUrl[0].split("\\.");
+        int last = url.lastIndexOf('/');
+        if (last != -1) {
+            url = url.substring(last + 1);
         } else {
-            exts = endUrl.split("\\.");
+            return "";
         }
 
-        return exts[exts.length - 1];
+        int mark = url.lastIndexOf('?');
+        if (mark != -1) {
+            url = url.substring(0, mark);
+        }
+
+        String suffix = "";
+        int point = url.lastIndexOf('.');
+        if (point != -1) {
+            suffix = url.substring(point + 1);
+        }
+        return suffix;
     }
 
     /**
@@ -289,9 +290,11 @@ public class Toolkit {
     private static final Pattern domainPattern = Pattern.compile(domainRegex);
 
     /**
-     * 得到
+     * 得到url的domain，如http://www.cs.whu.edu.cn -> cs.whu.edu.cn
+     * http://baidu.com -> baidu.com
+     *
      * @param url 该url要求比较严格，必须以http开头
-     * @return
+     * @return domain
      */
     public static String getDomainForUrl(String url) {
         String domain = null;
@@ -300,13 +303,11 @@ public class Toolkit {
         } else {
             Matcher m = domainPattern.matcher(url);
             while (m.find()) {
-                System.out.println("hello");
-                System.out.println();
                 domain = m.group(3);
                 break;
             }
         }
-        return domain;
+        return domain == null ? "" : domain;
     }
 
     public static void main(String[] args) {

@@ -1,7 +1,0 @@
-select count(*) from `data` where seed in (select url from seeds where ENABLE=0)
-
-DELETE from `data` where seed in (select url from seeds where ENABLE=0)
-
-select url from `data` where seed in (select url from seeds where ENABLE=0) and level =0
-
-ps -aux | grep crawel.jar | grep -v grep | awk '{print $2}' | xargs --no-run-if-empty kill

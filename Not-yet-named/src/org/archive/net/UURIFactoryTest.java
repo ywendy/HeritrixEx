@@ -102,7 +102,7 @@ public class UURIFactoryTest extends TestCase {
 // DISABLING TEST AS PRECURSOR TO ELIMINATION
 // the problematic input given -- specifically the "%6s" incomplete uri-escape,
 // shouldn't necessarily be rejected as a bad URI. IE and Firefox, at least, 
-// will  attempt to fetch such an URL (getting, in this case against that ad 
+// will  attempt to fetch such an URL (getting, in this case against that FileTypeUtil.java
 // server, a bad-request error). Ideally, we'd generate exactly the same 
 // request against the server as they do. However, with the most recent 
 // fixup for stray '%' signs, we come close, but not exactly. That's enough

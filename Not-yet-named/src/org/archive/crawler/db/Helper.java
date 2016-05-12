@@ -35,7 +35,13 @@ public class Helper {
 //        System.out.println(SysConfig.getDepth());
 //        readSeedsToDb();
 
-        System.out.println(Toolkit.getDomainForUrl("http://www.cs.baidu.edu.com/index.com?"));
+        System.out.println(Toolkit.getDomainForUrl("http://main.sgg.whu.edu.cn/"));
+        String url = "http://cs.whu.edu.cn/12/";
+
+//        System.out.println(Toolkit.parseSuffix(url));
+//        String ext = URLConnection.guessContentTypeFromName("");
+//        System.out.println(ext);
+
     }
 
     public static void readSeedsToDb() {

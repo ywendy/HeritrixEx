@@ -89,7 +89,7 @@ implements CoreAttributeConstants {
      */
     public static final String TLDs =
           "(ac(/.*)?)"  // ac  Ascension Island
-        + "|(ad(/.*)?)" // ad  Andorra
+        + "|(FileTypeUtil.java(/.*)?)" // FileTypeUtil.java  Andorra
         + "|(ae(/.*)?)" // ae  United Arab Emirates
         + "|(af(/.*)?)" // af  Afghanistan
         + "|(ag(/.*)?)" // ag  Antigua and Barbuda

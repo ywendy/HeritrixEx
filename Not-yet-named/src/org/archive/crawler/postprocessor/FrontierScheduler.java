@@ -32,6 +32,7 @@ import org.archive.crawler.datamodel.CrawlURI;
 import org.archive.crawler.datamodel.FetchStatusCodes;
 import org.archive.crawler.datamodel.SysConfig;
 import org.archive.crawler.db.SeedsService;
+import org.archive.crawler.extractor.ExtractorHTML;
 import org.archive.crawler.framework.Processor;
 import org.archive.crawler.util.Toolkit;
 
@@ -103,19 +104,23 @@ public class FrontierScheduler extends Processor
                     try {
                         SeedsService.markSeedDone(curi.getSeedSource());
                     } catch (SQLException e) {
-                        //e.printStackTrace();
+
                         LOGGER.info(getName() + "标志为完成时错误" + curi);
                     }
                 } else {
                     for (CandidateURI cauri : curi.getOutCandidates()) {
 
-                        if(!isCommonDomain(cauri.toString(),curi.toString()))
-                        {
-                            //检测是否是同一Domain下
+                        String nowUrl = Toolkit.trimSlash(cauri.toString());
+                        if (ExtractorHTML.isRejectSuffix(nowUrl)) {
+                            LOGGER.info(cauri + "后缀名未通过");
                             continue;
                         }
 
-                        String nowUrl = Toolkit.trimSlash(cauri.toString());
+                        if (!isCommonDomain(nowUrl, Toolkit.trimSlash(curi.getSeedSource().toString()))) {
+                            //检测是否是同一Domain下
+                            LOGGER.info(cauri + "非相同Domain");
+                        }
+
                         if (readlyURLs.contains(nowUrl))
                             continue;
                         try {
@@ -164,8 +169,7 @@ public class FrontierScheduler extends Processor
         getController().getFrontier().schedule(caUri);
     }
 
-    private boolean isCommonDomain(String sourceUrl,String url)
-    {
+    private boolean isCommonDomain(String sourceUrl, String url) {
         return Toolkit.getDomainForUrl(sourceUrl).equals(Toolkit.getDomainForUrl(url));
     }
 }
